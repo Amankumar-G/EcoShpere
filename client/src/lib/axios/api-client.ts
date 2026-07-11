@@ -1,5 +1,5 @@
-import axios from "axios";
-import { getApiBaseUrl } from "@/configuration/configuration";
+import axios from 'axios';
+import { getApiBaseUrl } from '@/configuration/configuration';
 
 export const apiClient = axios.create({
   baseURL: getApiBaseUrl(),
@@ -7,9 +7,7 @@ export const apiClient = axios.create({
 
 apiClient.interceptors.request.use((config) => {
   const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("accessToken")
-      : null;
+    typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
