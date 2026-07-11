@@ -28,10 +28,7 @@ describe('UserService', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        UserService,
-        { provide: PrismaService, useValue: prisma },
-      ],
+      providers: [UserService, { provide: PrismaService, useValue: prisma }],
     }).compile();
 
     service = module.get<UserService>(UserService);
@@ -117,7 +114,11 @@ describe('UserService', () => {
 
   describe('findByEmail', () => {
     it('finds a user by email including sensitive fields', () => {
-      const user = { id: 'user-1', email: 'jane@example.com', passwordHash: 'x' };
+      const user = {
+        id: 'user-1',
+        email: 'jane@example.com',
+        passwordHash: 'x',
+      };
       prisma.user.findUnique.mockResolvedValue(user);
 
       const result = service.findByEmail('jane@example.com');
