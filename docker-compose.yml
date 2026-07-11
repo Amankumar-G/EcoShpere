@@ -1,0 +1,15 @@
+services:
+  db:
+    container_name: odoo-db
+    image: ankane/pgvector
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=odoo
+    volumes:
+      - odoo_db_data:/var/lib/postgresql/data
+
+volumes:
+  odoo_db_data:
