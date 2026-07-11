@@ -3,7 +3,7 @@ const configuration = () => ({
   databaseUrl: process.env.DATABASE_URL,
   jwt: {
     secret: process.env.JWT_SECRET,
-    expiresIn: process.env.JWT_EXPIRES_IN ?? '1d',
+    expiresIn: parseInt(process.env.JWT_EXPIRES_IN_SECONDS ?? '86400', 10),
   },
 });
 export default configuration;
