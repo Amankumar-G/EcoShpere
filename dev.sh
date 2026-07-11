@@ -1,5 +1,5 @@
 #!/bin/bash
-# dev.sh — Start Odoo dev environment in tmux
+# dev.sh — Start hackathon dev environment in tmux
 # Usage:
 #   ./dev.sh          → start docker db + server + client (dev mode)
 #   ./dev.sh setup    → run setup only (install/migrate/generate), no start
@@ -10,7 +10,7 @@ set -e
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SERVER_DIR="$ROOT_DIR/server"
 CLIENT_DIR="$ROOT_DIR/client"
-SESSION="odoo"
+SESSION="hackathon"
 
 # ── Colors ──────────────────────────────────────────────────────────────────
 G='\033[0;32m'; Y='\033[1;33m'; R='\033[0;31m'; NC='\033[0m'

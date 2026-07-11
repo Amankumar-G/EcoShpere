@@ -49,15 +49,9 @@
 }
 
 :root {
-  /*
-   * Single source of truth for the app's brand color. Odoo-inspired
-   * purple/violet, matching Odoo ERP/CRM's primary brand hue. Change this
-   * one value (and its --dark counterpart below) to re-theme the whole
-   * app — every --primary/--ring/--sidebar-primary token derives from it.
-   */
   --brand: oklch(0.48 0.2 302);
   --brand-foreground: oklch(0.985 0 0);
-  /* Odoo's secondary accent, used sparingly for highlights/success states. */
+  /* hackathon's secondary accent, used sparingly for highlights/success states. */
   --accent-brand: oklch(0.7 0.19 46);
 
   --background: oklch(1 0 0);
