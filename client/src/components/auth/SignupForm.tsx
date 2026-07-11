@@ -12,23 +12,26 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { useLogin } from "@/data/auth/auth.hooks";
+import { useRegister } from "@/data/auth/auth.hooks";
 import { getErrorMessage } from "@/lib/axios/get-error-message";
-import { LoginSchema, loginSchema } from "@/lib/zod-schemas/login.schema";
+import {
+  RegisterSchema,
+  registerSchema,
+} from "@/lib/zod-schemas/register.schema";
 
-export function LoginForm() {
+export function SignupForm() {
   const router = useRouter();
-  const login = useLogin();
+  const signup = useRegister();
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginSchema>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<RegisterSchema>({
+    resolver: zodResolver(registerSchema),
   });
 
   const onSubmit = handleSubmit((values) => {
-    login.mutate(values, {
+    signup.mutate(values, {
       onSuccess: () => router.push("/"),
       onError: (error) => toast.error(getErrorMessage(error)),
     });
@@ -38,9 +41,14 @@ export function LoginForm() {
     <form onSubmit={onSubmit} noValidate>
       <FieldGroup>
         <Field>
-          <FieldLabel htmlFor="email">Email</FieldLabel>
+          <FieldLabel htmlFor="name">Name</FieldLabel>
+          <Input id="name" autoComplete="name" {...register("name")} />
+          <FieldError errors={[errors.name]} />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="signup-email">Email</FieldLabel>
           <Input
-            id="email"
+            id="signup-email"
             type="email"
             autoComplete="email"
             {...register("email")}
@@ -48,21 +56,21 @@ export function LoginForm() {
           <FieldError errors={[errors.email]} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="password">Password</FieldLabel>
+          <FieldLabel htmlFor="signup-password">Password</FieldLabel>
           <Input
-            id="password"
+            id="signup-password"
             type="password"
-            autoComplete="current-password"
+            autoComplete="new-password"
             {...register("password")}
           />
           <FieldError errors={[errors.password]} />
         </Field>
         <Button
           type="submit"
-          disabled={login.isPending}
+          disabled={signup.isPending}
           className="w-full rounded-full bg-[#111827] py-2.5 text-white hover:bg-[#374151]"
         >
-          {login.isPending ? "Signing in..." : "Sign in"}
+          {signup.isPending ? "Creating account..." : "Create account"}
         </Button>
       </FieldGroup>
     </form>
