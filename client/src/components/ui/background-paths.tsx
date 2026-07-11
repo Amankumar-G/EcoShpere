@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 function FloatingPaths({ position }: { position: number }) {
   const paths = Array.from({ length: 36 }, (_, i) => ({
@@ -23,7 +23,7 @@ function FloatingPaths({ position }: { position: number }) {
         className="w-full h-full"
         viewBox="0 0 696 316"
         fill="none"
-        style={{ color: "#8694b5" }}
+        style={{ color: '#8694b5' }}
       >
         <title>Background Paths</title>
         {paths.map((path) => (
@@ -42,7 +42,7 @@ function FloatingPaths({ position }: { position: number }) {
             transition={{
               duration: 20 + Math.random() * 10,
               repeat: Number.POSITIVE_INFINITY,
-              ease: "linear",
+              ease: 'linear',
             }}
           />
         ))}
@@ -52,9 +52,9 @@ function FloatingPaths({ position }: { position: number }) {
 }
 
 export function BackgroundPaths({
-  title = "Background Paths",
+  title = 'Background Paths',
   subtitle,
-  buttonText = "Discover Excellence",
+  buttonText = 'Discover Excellence',
   href,
   children,
 }: {
@@ -64,12 +64,12 @@ export function BackgroundPaths({
   href?: string;
   children?: React.ReactNode;
 }) {
-  const words = title.split(" ");
+  const words = title.split(' ');
 
   return (
     <div
       className="relative min-h-screen w-full flex items-center justify-center overflow-hidden"
-      style={{ backgroundColor: "#F8F7F4" }}
+      style={{ backgroundColor: '#F8F7F4' }}
     >
       <div className="absolute inset-0">
         <FloatingPaths position={1} />
@@ -85,18 +85,18 @@ export function BackgroundPaths({
         >
           <h1
             className="text-5xl sm:text-7xl md:text-8xl font-bold mb-6 tracking-tighter"
-            style={{ color: "#1B1B1B" }}
+            style={{ color: '#1B1B1B' }}
           >
             {words.map((word, wordIndex) => (
               <span key={wordIndex} className="inline-block mr-4 last:mr-0">
-                {word.split("").map((letter, letterIndex) => (
+                {word.split('').map((letter, letterIndex) => (
                   <motion.span
                     key={`${wordIndex}-${letterIndex}`}
                     initial={{ y: 100, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{
                       delay: wordIndex * 0.1 + letterIndex * 0.03,
-                      type: "spring",
+                      type: 'spring',
                       stiffness: 150,
                       damping: 25,
                     }}
@@ -112,7 +112,7 @@ export function BackgroundPaths({
           {subtitle && (
             <p
               className="mx-auto mb-4 max-w-xl text-lg"
-              style={{ color: "#707070" }}
+              style={{ color: '#707070' }}
             >
               {subtitle}
             </p>
@@ -120,7 +120,7 @@ export function BackgroundPaths({
 
           <div
             className="mx-auto mb-8 h-0.5 w-16 rounded-full"
-            style={{ backgroundColor: "#2563EB" }}
+            style={{ backgroundColor: '#2563EB' }}
           />
 
           {children ?? (
@@ -129,12 +129,12 @@ export function BackgroundPaths({
                 variant="ghost"
                 render={href ? <Link href={href} /> : undefined}
                 className="rounded-full px-8 py-6 text-lg font-semibold transition-colors duration-300"
-                style={{ backgroundColor: "#111827", color: "#FFFFFF" }}
+                style={{ backgroundColor: '#111827', color: '#FFFFFF' }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#374151";
+                  e.currentTarget.style.backgroundColor = '#374151';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "#111827";
+                  e.currentTarget.style.backgroundColor = '#111827';
                 }}
               >
                 <span>{buttonText}</span>

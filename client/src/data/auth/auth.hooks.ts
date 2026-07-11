@@ -1,10 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getMe, login, logout, register } from "@/data/auth/auth.api";
-import { useAuthToken } from "@/hooks/useAuthToken";
-import { LoginPayload, RegisterPayload } from "@/types/auth.interface";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { getMe, login, logout, register } from '@/data/auth/auth.api';
+import { useAuthToken } from '@/hooks/useAuthToken';
+import { LoginPayload, RegisterPayload } from '@/types/auth.interface';
 
 export const authQueryKeys = {
-  me: ["auth", "me"] as const,
+  me: ['auth', 'me'] as const,
 };
 
 export const useMe = () => {

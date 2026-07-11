@@ -1,6 +1,6 @@
-const AUTH_TOKEN_KEY = "accessToken";
+const AUTH_TOKEN_KEY = 'accessToken';
 
-const isBrowser = () => typeof window !== "undefined";
+const isBrowser = () => typeof window !== 'undefined';
 
 export const useAuthToken = () => {
   const getToken = () =>
