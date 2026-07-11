@@ -12,7 +12,10 @@ vi.mock('../../common/utils/password.util', () => ({
 
 describe('AuthService', () => {
   let service: AuthService;
-  let userService: { create: ReturnType<typeof vi.fn>; findByEmail: ReturnType<typeof vi.fn> };
+  let userService: {
+    create: ReturnType<typeof vi.fn>;
+    findByEmail: ReturnType<typeof vi.fn>;
+  };
   let jwtService: { sign: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
