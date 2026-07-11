@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { BackgroundPaths } from "@/components/ui/background-paths";
-import { LogoutButton } from "@/components/auth/LogoutButton";
-import { useMe } from "@/data/auth/auth.hooks";
+import { BackgroundPaths } from '@/components/ui/background-paths';
+import { LogoutButton } from '@/components/auth/LogoutButton';
+import { useMe } from '@/data/auth/auth.hooks';
 
 export default function Home() {
   const { data: user, isLoading } = useMe();

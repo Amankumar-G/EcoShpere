@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { useLogout } from "@/data/auth/auth.hooks";
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { useLogout } from '@/data/auth/auth.hooks';
 
 export function LogoutButton() {
   const router = useRouter();
@@ -13,10 +13,10 @@ export function LogoutButton() {
       variant="outline"
       disabled={logout.isPending}
       onClick={() =>
-        logout.mutate(undefined, { onSuccess: () => router.push("/login") })
+        logout.mutate(undefined, { onSuccess: () => router.push('/login') })
       }
     >
-      {logout.isPending ? "Signing out..." : "Sign out"}
+      {logout.isPending ? 'Signing out...' : 'Sign out'}
     </Button>
   );
 }

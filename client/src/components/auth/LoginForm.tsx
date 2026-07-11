@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { useLogin } from "@/data/auth/auth.hooks";
-import { getErrorMessage } from "@/lib/axios/get-error-message";
-import { LoginSchema, loginSchema } from "@/lib/zod-schemas/login.schema";
+} from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { useLogin } from '@/data/auth/auth.hooks';
+import { getErrorMessage } from '@/lib/axios/get-error-message';
+import { LoginSchema, loginSchema } from '@/lib/zod-schemas/login.schema';
 
 export function LoginForm() {
   const router = useRouter();
@@ -29,7 +29,7 @@ export function LoginForm() {
 
   const onSubmit = handleSubmit((values) => {
     login.mutate(values, {
-      onSuccess: () => router.push("/"),
+      onSuccess: () => router.push('/'),
       onError: (error) => toast.error(getErrorMessage(error)),
     });
   });
@@ -43,7 +43,7 @@ export function LoginForm() {
             id="email"
             type="email"
             autoComplete="email"
-            {...register("email")}
+            {...register('email')}
           />
           <FieldError errors={[errors.email]} />
         </Field>
@@ -53,7 +53,7 @@ export function LoginForm() {
             id="password"
             type="password"
             autoComplete="current-password"
-            {...register("password")}
+            {...register('password')}
           />
           <FieldError errors={[errors.password]} />
         </Field>
@@ -62,7 +62,7 @@ export function LoginForm() {
           disabled={login.isPending}
           className="w-full rounded-full bg-[#111827] py-2.5 text-white hover:bg-[#374151]"
         >
-          {login.isPending ? "Signing in..." : "Sign in"}
+          {login.isPending ? 'Signing in...' : 'Sign in'}
         </Button>
       </FieldGroup>
     </form>
