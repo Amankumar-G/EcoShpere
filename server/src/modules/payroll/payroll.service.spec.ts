@@ -40,7 +40,15 @@ describe('PayrollService', () => {
         startDate: '2026-01-01',
       });
 
-      const data = prisma.payrollContract.create.mock.calls[0][0].data;
+      const { data } = prisma.payrollContract.create.mock.calls[0][0] as {
+        data: {
+          employeeId: number;
+          leadershipLevel: string | null;
+          country: string | null;
+          endDate: Date | null;
+          startDate: Date;
+        };
+      };
       expect(data.employeeId).toBe(5);
       expect(data.leadershipLevel).toBeNull();
       expect(data.country).toBeNull();

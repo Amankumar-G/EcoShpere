@@ -68,7 +68,12 @@ describe('InvoiceService', () => {
         ],
       });
 
-      const data = prisma.invoice.create.mock.calls[0][0].data;
+      const { data } = prisma.invoice.create.mock.calls[0][0] as {
+        data: {
+          totalAmount: { toString(): string };
+          lines: { create: Array<{ amount: { toString(): string } }> };
+        };
+      };
       // 200 × 0.9 = 180, 3 × 10 = 30
       expect(data.lines.create[0].amount.toString()).toBe('180');
       expect(data.lines.create[1].amount.toString()).toBe('30');
@@ -97,12 +102,12 @@ describe('InvoiceService', () => {
 
       await service.post(1);
 
-      expect(prisma.invoice.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { id: 1 },
-          data: expect.objectContaining({ status: 'posted' }),
-        }),
-      );
+      const updateArg = prisma.invoice.update.mock.calls[0][0] as {
+        where: { id: number };
+        data: { status: string };
+      };
+      expect(updateArg.where).toEqual({ id: 1 });
+      expect(updateArg.data.status).toBe('posted');
       expect(eventEmitter.emit).toHaveBeenCalledWith(
         PostingEvents.InvoicePosted,
         expect.objectContaining({ invoiceId: 1, partnerId: 7 }),
