@@ -29,7 +29,7 @@ import {
   useEmployees,
   useUpdateEmployee,
 } from '@/data/employees/employees.hooks';
-import { Employee } from '@/types/employee.interface';
+import { Employee, GENDERS } from '@/types/employee.interface';
 import { Role } from '@/types/auth.interface';
 import {
   EmployeeSchema,
@@ -44,6 +44,10 @@ const ASSIGNABLE_ROLES: Record<Role, Role[]> = {
   employee: [],
 };
 
+function toDateInput(value?: string | null): string {
+  return value ? value.slice(0, 10) : '';
+}
+
 function toEmployeeFormValues(employee?: Employee): EmployeeSchema {
   return {
     name: employee?.name ?? '',
@@ -53,7 +57,8 @@ function toEmployeeFormValues(employee?: Employee): EmployeeSchema {
     departmentId: employee?.departmentId
       ? String(employee.departmentId)
       : NONE_VALUE,
-    gender: employee?.gender ?? '',
+    gender: (employee?.gender as EmployeeSchema['gender']) ?? '',
+    dob: toDateInput(employee?.dob),
     homeWorkDistance:
       employee?.homeWorkDistance != null
         ? String(employee.homeWorkDistance)
@@ -127,6 +132,21 @@ function EmployeeFormFields({
         </NativeSelect>
       </Field>
       <Field>
+        <FieldLabel htmlFor="employee-gender">Gender</FieldLabel>
+        <NativeSelect id="employee-gender" {...register('gender')}>
+          <NativeSelectOption value="">Unspecified</NativeSelectOption>
+          {GENDERS.map((gender) => (
+            <NativeSelectOption key={gender} value={gender}>
+              {gender}
+            </NativeSelectOption>
+          ))}
+        </NativeSelect>
+      </Field>
+      <Field>
+        <FieldLabel htmlFor="employee-dob">Date of birth</FieldLabel>
+        <Input id="employee-dob" type="date" {...register('dob')} />
+      </Field>
+      <Field>
         <FieldLabel htmlFor="employee-distance">
           Home-work distance (km)
         </FieldLabel>
@@ -165,6 +185,7 @@ function useEmployeeFormDialog(
           role: values.role,
           departmentId,
           gender: values.gender || null,
+          dob: values.dob || null,
           homeWorkDistance,
         },
       });
@@ -176,6 +197,7 @@ function useEmployeeFormDialog(
         role: values.role,
         departmentId,
         gender: values.gender || null,
+        dob: values.dob || null,
         homeWorkDistance,
       });
     }
@@ -185,7 +207,7 @@ function useEmployeeFormDialog(
   return { form, onSubmit, isEditing };
 }
 
-export default function SettingsEmployeesPage() {
+export default function RecordsEmployeesPage() {
   const { data: currentUser } = useMe();
   const { data: departmentData } = useDepartments(true);
   const deleteEmployee = useDeleteEmployee();
@@ -211,6 +233,8 @@ export default function SettingsEmployeesPage() {
 
   const departments = departmentData ?? [];
   const assignableRoles = currentUser ? ASSIGNABLE_ROLES[currentUser.role] : [];
+  // Employee creation (as opposed to editing) is admin-only.
+  const canCreate = currentUser?.role === 'admin';
 
   const { form, onSubmit, isEditing } = useEmployeeFormDialog(
     editingEmployee,
@@ -279,10 +303,12 @@ export default function SettingsEmployeesPage() {
         title="Employees"
         description="Manage employee records, departments, and roles."
         action={
-          <Button onClick={openCreateForm}>
-            <Plus className="size-4" />
-            New employee
-          </Button>
+          canCreate ? (
+            <Button onClick={openCreateForm}>
+              <Plus className="size-4" />
+              New employee
+            </Button>
+          ) : undefined
         }
       />
       <DataTable
