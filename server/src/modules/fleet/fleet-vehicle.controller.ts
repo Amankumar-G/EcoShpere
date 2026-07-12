@@ -8,12 +8,12 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { Authenticated } from '../auth/decorators/authenticated.decorator';
+import { Auth } from '../auth/decorators/auth.decorator';
 import { CreateFleetVehicleDto, UpdateFleetVehicleDto } from './dto/fleet.dto';
 import { FleetService } from './fleet.service';
 
 @Controller('fleet/vehicles')
-@Authenticated()
+@Auth()
 export class FleetVehicleController {
   constructor(private readonly fleetService: FleetService) {}
 

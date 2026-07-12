@@ -10,12 +10,13 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { Authenticated } from '../auth/decorators/authenticated.decorator';
+import { Role } from '@prisma/client';
+import { Auth } from '../auth/decorators/auth.decorator';
 import { CreateExpenseDto, UpdateExpenseDto } from './dto/expense.dto';
 import { ExpenseService } from './expense.service';
 
 @Controller('expenses')
-@Authenticated()
+@Auth()
 export class ExpenseController {
   constructor(private readonly expenseService: ExpenseService) {}
 
@@ -46,18 +47,21 @@ export class ExpenseController {
   }
 
   @Post(':id/approve')
+  @Auth(Role.admin, Role.manager)
   @HttpCode(HttpStatus.OK)
   approve(@Param('id', ParseIntPipe) id: number) {
     return this.expenseService.approve(id);
   }
 
   @Post(':id/reject')
+  @Auth(Role.admin, Role.manager)
   @HttpCode(HttpStatus.OK)
   reject(@Param('id', ParseIntPipe) id: number) {
     return this.expenseService.reject(id);
   }
 
   @Post(':id/post')
+  @Auth(Role.admin, Role.manager)
   @HttpCode(HttpStatus.OK)
   post(@Param('id', ParseIntPipe) id: number) {
     return this.expenseService.post(id);

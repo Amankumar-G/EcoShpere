@@ -8,22 +8,25 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
+import { Role } from '@prisma/client';
 import { ImportCsvDto } from '../../common/csv/import-csv.dto';
-import { Authenticated } from '../auth/decorators/authenticated.decorator';
+import { Auth } from '../auth/decorators/auth.decorator';
 import { CreateFleetModelDto, UpdateFleetModelDto } from './dto/fleet.dto';
 import { FleetService } from './fleet.service';
 
 @Controller('fleet/models')
-@Authenticated()
+@Auth()
 export class FleetModelController {
   constructor(private readonly fleetService: FleetService) {}
 
   @Post()
+  @Auth(Role.admin, Role.manager)
   create(@Body() dto: CreateFleetModelDto) {
     return this.fleetService.createModel(dto);
   }
 
   @Post('import')
+  @Auth(Role.admin, Role.manager)
   import(@Body() dto: ImportCsvDto) {
     return this.fleetService.importModelsCsv(dto.csv);
   }
@@ -39,6 +42,7 @@ export class FleetModelController {
   }
 
   @Patch(':id')
+  @Auth(Role.admin, Role.manager)
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateFleetModelDto,
@@ -47,6 +51,7 @@ export class FleetModelController {
   }
 
   @Delete(':id')
+  @Auth(Role.admin, Role.manager)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.fleetService.removeModel(id);
   }

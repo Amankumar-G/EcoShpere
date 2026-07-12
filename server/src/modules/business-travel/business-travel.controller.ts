@@ -8,7 +8,7 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { Authenticated } from '../auth/decorators/authenticated.decorator';
+import { Auth } from '../auth/decorators/auth.decorator';
 import {
   CreateBusinessTravelDto,
   UpdateBusinessTravelDto,
@@ -16,7 +16,7 @@ import {
 import { BusinessTravelService } from './business-travel.service';
 
 @Controller('business-travels')
-@Authenticated()
+@Auth()
 export class BusinessTravelController {
   constructor(private readonly businessTravelService: BusinessTravelService) {}
 
