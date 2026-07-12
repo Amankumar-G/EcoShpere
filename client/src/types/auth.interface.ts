@@ -1,11 +1,16 @@
+export type Role = 'admin' | 'manager' | 'employee';
+
 export interface AuthUser {
-  id: string;
+  id: number;
   email: string;
   name: string | null;
+  role: Role;
+  departmentId: number | null;
 }
 
 export interface AuthResponse {
   accessToken: string;
+  role: Role;
 }
 
 export interface LoginPayload {
