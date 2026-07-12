@@ -1,6 +1,15 @@
-export const CONTRACT_TYPES = ['permanent', 'temporary'] as const;
+export const CONTRACT_TYPES = [
+  'permanent',
+  'temporary',
+  'intern',
+  'contract',
+] as const;
 
-export const LEADERSHIP_LEVELS = ['management', 'non_management'] as const;
+export const LEADERSHIP_LEVELS = [
+  'management',
+  'non_management',
+  'administrative',
+] as const;
 
 export interface PayrollContract {
   id: number;

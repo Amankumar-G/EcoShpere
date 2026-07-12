@@ -52,7 +52,7 @@ function toFormValues(invoice?: Invoice): InvoiceSchema {
     return {
       partnerId: '',
       date: '',
-      currency: 'EUR',
+      currency: 'INR',
       lines: [emptyLine()],
     };
   }
