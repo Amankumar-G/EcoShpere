@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import { createPrismaPgAdapter } from '../src/prisma/prisma-adapter.factory';
 import { seedPhase0 } from './seeds/phase-0.seed';
+import { seedPhase2 } from './seeds/phase-2.seed';
 
 /**
  * Seed registry.
@@ -16,7 +17,10 @@ import { seedPhase0 } from './seeds/phase-0.seed';
  * Every seed group must be idempotent: running the full list twice must
  * leave the database in the same state as running it once.
  */
-const seedGroups: Array<(prisma: PrismaClient) => Promise<void>> = [seedPhase0];
+const seedGroups: Array<(prisma: PrismaClient) => Promise<void>> = [
+  seedPhase0,
+  seedPhase2,
+];
 
 async function main(): Promise<void> {
   const prisma = new PrismaClient({

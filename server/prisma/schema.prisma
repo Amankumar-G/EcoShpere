@@ -76,3 +76,29 @@ model Notification {
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 }
+
+model Gas {
+  id       Int     @id @default(autoincrement())
+  name     String
+  symbol   String  @unique
+  gwp      Decimal @db.Decimal(10, 2)
+  gwpMetric String @default("AR5")
+}
+
+model EmissionScope {
+  id     Int    @id @default(autoincrement())
+  name   String
+  code   String @unique
+
+  parentId Int?
+  parent   EmissionScope?  @relation("ScopeHierarchy", fields: [parentId], references: [id])
+  children EmissionScope[] @relation("ScopeHierarchy")
+}
+
+model SourceDatabase {
+  id             Int       @id @default(autoincrement())
+  name           String
+  provider       String?
+  url            String?
+  lastImportedAt DateTime?
+}
