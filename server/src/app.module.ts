@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import configuration from './config/configuration';
 import { AuthModule } from './modules/auth/auth.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
+import { EmployeesModule } from './modules/employees/employees.module';
 import { EsgConfigModule } from './modules/esg-config/esg-config.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -18,6 +19,7 @@ import { PrismaModule } from './prisma/prisma.module';
     PrismaModule,
     AuthModule,
     DepartmentsModule,
+    EmployeesModule,
     EsgConfigModule,
     NotificationsModule,
   ],
