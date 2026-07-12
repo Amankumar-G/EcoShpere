@@ -30,7 +30,7 @@ export default function LoginPage() {
         </p>
       </section>
 
-      <section className="flex w-full flex-1 items-center justify-center p-6 lg:w-1/2 lg:p-14">
+      <section className="flex w-full flex-1 items-center justify-center bg-gradient-to-br from-transparent via-transparent to-primary/10 p-6 lg:w-1/2 lg:p-14">
         <div className="w-full max-w-sm">
           <Link
             href="/"
