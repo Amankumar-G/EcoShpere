@@ -57,6 +57,7 @@ export class EmissionFactorsService {
         computeMethod: dto.computeMethod,
         unitOfMeasure: dto.unitOfMeasure,
         uncertainty: dto.uncertainty,
+        status: dto.status,
       },
       ...EMISSION_FACTOR_WITH_RELATIONS,
     });

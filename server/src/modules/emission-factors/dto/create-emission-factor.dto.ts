@@ -33,4 +33,9 @@ export class CreateEmissionFactorDto {
   @Min(0)
   @Max(100)
   uncertainty?: number;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  status?: string;
 }
