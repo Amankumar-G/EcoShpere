@@ -54,7 +54,6 @@ export interface SubNavItem {
 
 export const settingsSubNavItems: SubNavItem[] = [
   { label: 'Departments', href: '/settings/departments', icon: Building2 },
-  { label: 'Employees', href: '/settings/employees', icon: Users2 },
   { label: 'Categories', href: '/settings/categories', icon: ListTree },
   {
     label: 'ESG Configuration',
@@ -63,8 +62,9 @@ export const settingsSubNavItems: SubNavItem[] = [
   },
 ];
 
-// Records — the Phase 1 operational-records data-entry layer. Payroll is
-// admin-only (feeds the pay-gap scoring formula).
+// Records — the Phase 1 operational-records data-entry layer. Employees is
+// listable by admin/manager only; Payroll is admin-only (feeds the pay-gap
+// scoring formula).
 export const recordsSubNavItems: SubNavItem[] = [
   { label: 'Invoices', href: '/records/invoices', icon: ReceiptText },
   { label: 'Expenses', href: '/records/expenses', icon: Wallet },
@@ -76,6 +76,12 @@ export const recordsSubNavItems: SubNavItem[] = [
     label: 'Business Travel',
     href: '/records/business-travel',
     icon: Plane,
+  },
+  {
+    label: 'Employees',
+    href: '/records/employees',
+    icon: Users2,
+    roles: ['admin', 'manager'],
   },
   {
     label: 'Payroll',
