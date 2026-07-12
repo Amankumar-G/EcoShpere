@@ -2,10 +2,14 @@ import {
   Banknote,
   BookOpen,
   Building2,
+  Calculator,
   Car,
   ClipboardList,
   Contact,
+  Database,
+  FlaskConical,
   Gauge,
+  GitMerge,
   Leaf,
   ListTree,
   Package,
@@ -59,6 +63,32 @@ export const settingsSubNavItems: SubNavItem[] = [
     label: 'ESG Configuration',
     href: '/settings/esg-configuration',
     icon: SlidersHorizontal,
+  },
+  {
+    label: 'Emission Factors',
+    href: '/settings/esg-configuration/emission-factors',
+    icon: Calculator,
+  },
+  {
+    label: 'Emission Scopes',
+    href: '/settings/esg-configuration/emission-scopes',
+    icon: ListTree,
+  },
+  {
+    label: 'Gases',
+    href: '/settings/esg-configuration/gases',
+    icon: FlaskConical,
+  },
+  {
+    label: 'Source Databases',
+    href: '/settings/esg-configuration/source-databases',
+    icon: Database,
+  },
+  {
+    label: 'Assignation Rules',
+    href: '/settings/esg-configuration/assignation-rules',
+    icon: GitMerge,
+    roles: ['admin'],
   },
 ];
 

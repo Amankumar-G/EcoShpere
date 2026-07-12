@@ -59,6 +59,7 @@ model Department {
   headEmployee   Employee? @relation("DepartmentHead", fields: [headEmployeeId], references: [id])
 
   employees Employee[] @relation("DeptEmployees")
+  emittedEmissions EmittedEmission[]
 }
 
 model Category {
@@ -84,6 +85,128 @@ model Notification {
   createdAt DateTime @default(now())
 }
 
+model Gas {
+  id       Int     @id @default(autoincrement())
+  name     String
+  symbol   String  @unique
+  gwp      Decimal @db.Decimal(10, 2)
+  gwpMetric String @default("AR5")
+
+  gasLines EmissionFactorGasLine[]
+}
+
+model EmissionScope {
+  id     Int    @id @default(autoincrement())
+  name   String
+  code   String @unique
+
+  parentId Int?
+  parent   EmissionScope?  @relation("ScopeHierarchy", fields: [parentId], references: [id])
+  children EmissionScope[] @relation("ScopeHierarchy")
+
+  emissionFactors EmissionFactor[]
+}
+
+model SourceDatabase {
+  id             Int       @id @default(autoincrement())
+  name           String
+  provider       String?
+  url            String?
+  lastImportedAt DateTime?
+
+  emissionFactors EmissionFactor[]
+}
+
+enum ComputeMethod {
+  physical
+  monetary
+}
+
+model EmissionFactor {
+  id             Int           @id @default(autoincrement())
+  name           String
+  uncertainty    Decimal?      @db.Decimal(5, 2)
+  computeMethod  ComputeMethod
+  unitOfMeasure  String
+  status         String        @default("active")
+  value          Decimal       @default(0) @db.Decimal(18, 4)
+
+  scopeId Int
+  scope   EmissionScope @relation(fields: [scopeId], references: [id])
+
+  sourceDatabaseId Int
+  sourceDatabase   SourceDatabase @relation(fields: [sourceDatabaseId], references: [id])
+
+  gasLines EmissionFactorGasLine[]
+  emittedEmissions EmittedEmission[]
+  assignationRules AssignationRule[]
+}
+
+model EmissionFactorGasLine {
+  id           Int     @id @default(autoincrement())
+  activityType String?
+  value        Decimal @db.Decimal(18, 4)
+  unit         String
+
+  emissionFactorId Int
+  emissionFactor   EmissionFactor @relation(fields: [emissionFactorId], references: [id], onDelete: Cascade)
+
+  gasId Int
+  gas   Gas @relation(fields: [gasId], references: [id])
+}
+
+enum EmissionSourceType {
+  accounting
+  fleet_commuting
+  manual
+}
+
+model EmittedEmission {
+  id          Int                @id @default(autoincrement())
+  name        String
+  sourceType  EmissionSourceType @default(manual)
+  sourceRefId Int?
+  employeeId  Int?
+  quantity    Decimal            @db.Decimal(18, 4)
+  co2eValue   Decimal            @db.Decimal(18, 4)
+  periodStart DateTime?
+  periodEnd   DateTime?
+  date        DateTime
+  evidenceUrl String?
+  createdAt   DateTime           @default(now())
+
+  // Nullable: accounting-sourced (Path A) emissions from an Invoice have no
+  // department (invoices are vendor-wide, not attributed to a department).
+  departmentId Int?
+  department   Department? @relation(fields: [departmentId], references: [id])
+
+  // Nullable: fleet-commuting (Path B) emissions compute directly from
+  // FleetVehicleModel.co2Emissions and have no EmissionFactor to point to.
+  emissionFactorId Int?
+  emissionFactor   EmissionFactor? @relation(fields: [emissionFactorId], references: [id])
+}
+
+// Resolves a Phase 1 accounting record (by product/partner/account) to the
+// EmissionFactor that should be used for Path A auto-calc. Priority at match
+// time: product > partner > account, then most-attributes-matched, then
+// newest rule (see AssignationMatchService).
+model AssignationRule {
+  id                     Int       @id @default(autoincrement())
+  productId              Int?
+  product                Product?  @relation(fields: [productId], references: [id])
+  partnerId              Int?
+  partner                Partner?  @relation(fields: [partnerId], references: [id])
+  accountId              Int?
+  account                Account?  @relation(fields: [accountId], references: [id])
+  applicationPeriodStart DateTime?
+  applicationPeriodEnd   DateTime?
+  replaceExisting        Boolean   @default(false)
+  createdAt              DateTime  @default(now())
+
+  emissionFactorId Int
+  emissionFactor   EmissionFactor @relation(fields: [emissionFactorId], references: [id])
+}
+
 /// ============================================================================
 /// PHASE 1 — OPERATIONAL RECORDS (the emission inputs)
 ///
@@ -105,8 +228,9 @@ model Product {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  invoiceLines   InvoiceLine[]
-  expenseRecords ExpenseRecord[]
+  invoiceLines     InvoiceLine[]
+  expenseRecords   ExpenseRecord[]
+  assignationRules AssignationRule[]
 
   @@map("products")
 }
@@ -123,7 +247,8 @@ model Partner {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  invoices Invoice[]
+  invoices         Invoice[]
+  assignationRules AssignationRule[]
 
   @@map("partners")
 }
@@ -138,9 +263,10 @@ model Account {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  products       Product[]
-  invoiceLines   InvoiceLine[]
-  expenseRecords ExpenseRecord[]
+  products         Product[]
+  invoiceLines     InvoiceLine[]
+  expenseRecords   ExpenseRecord[]
+  assignationRules AssignationRule[]
 
   @@map("accounts")
 }

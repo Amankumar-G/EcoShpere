@@ -77,3 +77,8 @@ pids
 
 # diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+.claude
+docs
+EcoSphere ESG Platform — Scope, Requirements & Terminology (Engineering Reference).md
+EcoSphere ESG Management Platform (1).pdf
+ecospher - 8 hours.excalidraw

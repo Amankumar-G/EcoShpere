@@ -59,6 +59,7 @@ export type DataTableProps<TRow> = {
   onSortChange?: (sort: DataTableSort | undefined) => void;
   filters?: Record<string, string>;
   onFilterChange?: (columnId: string, value: string) => void;
+  onRowClick?: (row: TRow) => void;
 };
 
 function toggleSortDirection(current?: DataTableSort, columnId?: string) {
@@ -201,6 +202,7 @@ export function DataTable<TRow>({
   onSortChange,
   filters,
   onFilterChange,
+  onRowClick,
 }: DataTableProps<TRow>) {
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
   const hasRows = rows.length > 0;
@@ -236,7 +238,11 @@ export function DataTable<TRow>({
               <DataTableSkeletonRows columns={columns} />
             ) : hasRows ? (
               rows.map((row) => (
-                <TableRow key={getRowId(row)}>
+                <TableRow
+                  key={getRowId(row)}
+                  onClick={() => onRowClick?.(row)}
+                  className={cn(onRowClick && 'cursor-pointer')}
+                >
                   {columns.map((column) => (
                     <TableCell key={column.id}>{column.cell(row)}</TableCell>
                   ))}

@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { createPrismaPgAdapter } from '../src/prisma/prisma-adapter.factory';
 import { seedPhase0 } from './seeds/phase-0.seed';
 import { seedPhase1 } from './seeds/phase-1.seed';
+import { seedPhase2 } from './seeds/phase-2.seed';
 
 /**
  * Seed registry.
@@ -20,6 +21,7 @@ import { seedPhase1 } from './seeds/phase-1.seed';
 const seedGroups: Array<(prisma: PrismaClient) => Promise<void>> = [
   seedPhase0,
   seedPhase1,
+  seedPhase2,
 ];
 
 async function main(): Promise<void> {

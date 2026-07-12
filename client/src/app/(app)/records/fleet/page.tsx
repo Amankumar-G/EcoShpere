@@ -5,6 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Pencil, Plus, Trash2, Upload } from 'lucide-react';
 
+import { toast } from 'sonner';
+
 import { PageHeader } from '@/components/shared/page-header';
 import { DataTable, DataTableColumn } from '@/components/shared/data-table';
 import { FormDialog } from '@/components/shared/form-dialog';
@@ -13,6 +15,13 @@ import { CsvImportDialog } from '@/components/records/csv-import-dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import {
   NativeSelect,
@@ -30,7 +39,10 @@ import {
   useUpdateFleetModel,
   useUpdateFleetVehicle,
 } from '@/data/fleet/fleet.hooks';
+import { useRunFleetCommuting } from '@/data/fleet-commuting/fleet-commuting.hooks';
 import { useEmployeeOptions } from '@/data/employees/employees.hooks';
+import { useMe } from '@/data/auth/auth.hooks';
+import { getErrorMessage } from '@/lib/axios/get-error-message';
 import { FleetVehicle, FleetVehicleModel } from '@/types/fleet.interface';
 import { RECORD_STATUSES } from '@/types/records.interface';
 import {
@@ -406,13 +418,63 @@ function VehiclesSection() {
   );
 }
 
+function FleetCommutingRunCard() {
+  const runFleetCommuting = useRunFleetCommuting();
+  const [period, setPeriod] = React.useState('');
+
+  const handleRun = async () => {
+    if (!period) {
+      toast.error('Select a period first');
+      return;
+    }
+    try {
+      const result = await runFleetCommuting.mutateAsync(period);
+      toast.success(
+        `Processed ${result.employeesProcessed} employees, skipped ${result.employeesSkipped}, total ${result.totalCo2eValue} kgCO2e`,
+      );
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Run Commuting Calculation</CardTitle>
+        <CardDescription>
+          Compute fleet commuting emissions for all employees for a given
+          period.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex items-end gap-3">
+        <Field>
+          <FieldLabel htmlFor="commuting-period">Period</FieldLabel>
+          <Input
+            id="commuting-period"
+            type="month"
+            value={period}
+            onChange={(event) => setPeriod(event.target.value)}
+          />
+        </Field>
+        <Button onClick={handleRun} disabled={runFleetCommuting.isPending}>
+          Run
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function FleetPage() {
+  const { data: me } = useMe();
+  const isAdmin = me?.role === 'admin';
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Fleet"
         description="Vehicle models (kgCO₂e/km) and employee vehicle assignments for commuting emissions."
       />
+      {isAdmin && <FleetCommutingRunCard />}
       <Tabs defaultValue="models">
         <TabsList>
           <TabsTrigger value="models">Models</TabsTrigger>
