@@ -4,6 +4,11 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { EsgConfigService } from '../esg-config/esg-config.service';
 import { FleetCommutingService } from './fleet-commuting.service';
 
+function createdData(mock: ReturnType<typeof vi.fn>): Record<string, unknown> {
+  const call = mock.mock.calls[0] as [{ data: Record<string, unknown> }];
+  return call[0].data;
+}
+
 function vehicleRow(overrides: Partial<Record<string, unknown>> = {}) {
   return {
     id: 1,
@@ -50,14 +55,12 @@ describe('FleetCommutingService', () => {
 
     const result = await service.run('2026-02');
 
-    expect(prisma.emittedEmission.create).toHaveBeenCalledWith(
+    expect(createdData(prisma.emittedEmission.create)).toEqual(
       expect.objectContaining({
-        data: expect.objectContaining({
-          sourceType: 'fleet_commuting',
-          employeeId: 1,
-          departmentId: 4,
-          co2eValue: 57.6,
-        }),
+        sourceType: 'fleet_commuting',
+        employeeId: 1,
+        departmentId: 4,
+        co2eValue: 57.6,
       }),
     );
     expect(result.employeesProcessed).toBe(1);

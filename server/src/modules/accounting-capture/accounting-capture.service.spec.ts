@@ -6,6 +6,11 @@ import { EmissionFactorsService } from '../emission-factors/emission-factors.ser
 import { EsgConfigService } from '../esg-config/esg-config.service';
 import { AccountingCaptureService } from './accounting-capture.service';
 
+function createdData(mock: ReturnType<typeof vi.fn>): Record<string, unknown> {
+  const call = mock.mock.calls[0] as [{ data: Record<string, unknown> }];
+  return call[0].data;
+}
+
 function factorDto(overrides: Partial<Record<string, unknown>> = {}) {
   return {
     id: 1,
@@ -86,15 +91,13 @@ describe('AccountingCaptureService', () => {
       postedAt: new Date('2026-02-01'),
     });
 
-    expect(prisma.emittedEmission.create).toHaveBeenCalledWith(
+    expect(createdData(prisma.emittedEmission.create)).toEqual(
       expect.objectContaining({
-        data: expect.objectContaining({
-          sourceType: 'accounting',
-          sourceRefId: 10,
-          departmentId: null,
-          quantity: 100,
-          co2eValue: 269,
-        }),
+        sourceType: 'accounting',
+        sourceRefId: 10,
+        departmentId: null,
+        quantity: 100,
+        co2eValue: 269,
       }),
     );
   });
@@ -117,10 +120,8 @@ describe('AccountingCaptureService', () => {
       postedAt: new Date('2026-02-01'),
     });
 
-    expect(prisma.emittedEmission.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({ co2eValue: 2250 }),
-      }),
+    expect(createdData(prisma.emittedEmission.create)).toEqual(
+      expect.objectContaining({ co2eValue: 2250 }),
     );
   });
 
@@ -160,16 +161,14 @@ describe('AccountingCaptureService', () => {
       postedAt: new Date('2026-02-01'),
     });
 
-    expect(prisma.emittedEmission.create).toHaveBeenCalledWith(
+    expect(createdData(prisma.emittedEmission.create)).toEqual(
       expect.objectContaining({
-        data: expect.objectContaining({
-          sourceType: 'accounting',
-          sourceRefId: 20,
-          employeeId: 3,
-          departmentId: 9,
-          quantity: 50,
-          co2eValue: 134.5,
-        }),
+        sourceType: 'accounting',
+        sourceRefId: 20,
+        employeeId: 3,
+        departmentId: 9,
+        quantity: 50,
+        co2eValue: 134.5,
       }),
     );
   });

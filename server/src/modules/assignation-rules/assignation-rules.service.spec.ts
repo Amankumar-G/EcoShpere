@@ -4,6 +4,11 @@ import { describe, beforeEach, it, expect, vi } from 'vitest';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AssignationRulesService } from './assignation-rules.service';
 
+function createdData(mock: ReturnType<typeof vi.fn>): Record<string, unknown> {
+  const call = mock.mock.calls[0] as [{ data: Record<string, unknown> }];
+  return call[0].data;
+}
+
 function ruleRow(overrides: Partial<Record<string, unknown>> = {}) {
   return {
     id: 1,
@@ -58,14 +63,12 @@ describe('AssignationRulesService', () => {
       accountId: 5,
     });
 
-    expect(prisma.assignationRule.create).toHaveBeenCalledWith(
+    expect(createdData(prisma.assignationRule.create)).toEqual(
       expect.objectContaining({
-        data: expect.objectContaining({
-          productId: null,
-          partnerId: null,
-          accountId: 5,
-          replaceExisting: false,
-        }),
+        productId: null,
+        partnerId: null,
+        accountId: 5,
+        replaceExisting: false,
       }),
     );
     expect(result.accountId).toBe(5);

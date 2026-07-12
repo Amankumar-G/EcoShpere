@@ -3,10 +3,16 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
 import { Role } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { AuthUser } from '../auth/interfaces/jwt-payload.interface';
 import { DepartmentScopeService } from '../departments/department-scope.service';
 import { EmissionFactorsService } from '../emission-factors/emission-factors.service';
 import { EmissionScopeTreeService } from '../emission-scopes/emission-scope-tree.service';
 import { EmittedEmissionsService } from './emitted-emissions.service';
+
+function createdData(mock: ReturnType<typeof vi.fn>): Record<string, unknown> {
+  const call = mock.mock.calls[0] as [{ data: Record<string, unknown> }];
+  return call[0].data;
+}
 
 function emissionRow(overrides: Partial<Record<string, unknown>> = {}) {
   return {
@@ -71,8 +77,20 @@ describe('EmittedEmissionsService', () => {
   let departmentScope: { resolveSubtreeIds: ReturnType<typeof vi.fn> };
   let scopeTree: { resolveSubtreeIds: ReturnType<typeof vi.fn> };
 
-  const adminActor = { role: Role.admin, departmentId: null } as any;
-  const managerActor = { role: Role.manager, departmentId: 1 } as any;
+  const adminActor: AuthUser = {
+    id: 1,
+    email: 'admin@example.com',
+    name: 'Admin',
+    role: Role.admin,
+    departmentId: null,
+  };
+  const managerActor: AuthUser = {
+    id: 2,
+    email: 'manager@example.com',
+    name: 'Manager',
+    role: Role.manager,
+    departmentId: 1,
+  };
 
   beforeEach(async () => {
     prisma = {
@@ -108,12 +126,10 @@ describe('EmittedEmissionsService', () => {
       departmentId: 1,
     });
 
-    expect(prisma.emittedEmission.create).toHaveBeenCalledWith(
+    expect(createdData(prisma.emittedEmission.create)).toEqual(
       expect.objectContaining({
-        data: expect.objectContaining({
-          co2eValue: 2600,
-          sourceType: 'manual',
-        }),
+        co2eValue: 2600,
+        sourceType: 'manual',
       }),
     );
   });
@@ -132,10 +148,8 @@ describe('EmittedEmissionsService', () => {
       departmentId: 1,
     });
 
-    expect(prisma.emittedEmission.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({ co2eValue: 2250 }),
-      }),
+    expect(createdData(prisma.emittedEmission.create)).toEqual(
+      expect.objectContaining({ co2eValue: 2250 }),
     );
   });
 
@@ -236,10 +250,8 @@ describe('EmittedEmissionsService', () => {
       businessTravelRefId: 42,
     });
 
-    expect(prisma.emittedEmission.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({ sourceRefId: 42 }),
-      }),
+    expect(createdData(prisma.emittedEmission.create)).toEqual(
+      expect.objectContaining({ sourceRefId: 42 }),
     );
   });
 
