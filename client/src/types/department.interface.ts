@@ -1,0 +1,16 @@
+export interface Department {
+  id: number;
+  name: string;
+  code: string;
+  parentId: number | null;
+  headEmployeeId: number | null;
+  employeeCount: number;
+  status: string;
+}
+
+export interface DepartmentPayload {
+  name: string;
+  code: string;
+  parentId?: number | null;
+  headEmployeeId?: number | null;
+}
