@@ -1,36 +1,62 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { comparePassword } from '../../common/utils/password.util';
-import { UserService } from '../user/user.service';
+import {
+  comparePassword,
+  hashPassword,
+} from '../../common/utils/password.util';
+import { PrismaService } from '../../prisma/prisma.service';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { RegisterDto } from './dto/register.dto';
-import { AuthUser } from './interfaces/jwt-payload.interface';
+import { AuthUser, JwtPayload } from './interfaces/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UserService,
+    private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
   ) {}
 
   async register(dto: RegisterDto): Promise<AuthResponseDto> {
-    const user = await this.userService.create(dto);
-    return this.login({ id: user.id, email: user.email, name: user.name });
+    const passwordHash = await hashPassword(dto.password);
+    const employee = await this.prisma.employee.create({
+      data: { email: dto.email, name: dto.name ?? dto.email, passwordHash },
+    });
+    return this.login({
+      id: employee.id,
+      email: employee.email,
+      name: employee.name,
+      role: employee.role,
+      departmentId: employee.departmentId,
+    });
   }
 
   async validateUser(email: string, password: string): Promise<AuthUser> {
-    const user = await this.userService.findByEmail(email);
-    if (!user || !(await comparePassword(password, user.passwordHash))) {
+    const employee = await this.prisma.employee.findUnique({
+      where: { email },
+    });
+    if (
+      !employee ||
+      !(await comparePassword(password, employee.passwordHash))
+    ) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    return { id: user.id, email: user.email, name: user.name };
+    return {
+      id: employee.id,
+      email: employee.email,
+      name: employee.name,
+      role: employee.role,
+      departmentId: employee.departmentId,
+    };
   }
 
   login(user: AuthUser): AuthResponseDto {
-    const accessToken = this.jwtService.sign({
+    const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
-    });
-    return { accessToken };
+      role: user.role,
+      departmentId: user.departmentId,
+    };
+    const accessToken = this.jwtService.sign(payload);
+    return { accessToken, role: user.role };
   }
 }
