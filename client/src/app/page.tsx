@@ -1,21 +1,23 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { BackgroundPaths } from '@/components/ui/background-paths';
-import { LogoutButton } from '@/components/auth/LogoutButton';
 import { useMe } from '@/data/auth/auth.hooks';
+import { useAuthToken } from '@/hooks/useAuthToken';
 
 export default function Home() {
+  const router = useRouter();
+  const { getToken } = useAuthToken();
   const { data: user, isLoading } = useMe();
 
-  if (isLoading) return null;
+  useEffect(() => {
+    if (getToken() && user) {
+      router.replace('/dashboard');
+    }
+  }, [getToken, user, router]);
 
-  if (user) {
-    return (
-      <BackgroundPaths title="Welcome Back" subtitle={user.email}>
-        <LogoutButton />
-      </BackgroundPaths>
-    );
-  }
+  if (isLoading) return null;
 
   return (
     <BackgroundPaths

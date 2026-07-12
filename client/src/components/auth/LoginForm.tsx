@@ -29,7 +29,7 @@ export function LoginForm() {
 
   const onSubmit = handleSubmit((values) => {
     login.mutate(values, {
-      onSuccess: () => router.push('/'),
+      onSuccess: () => router.push('/dashboard'),
       onError: (error) => toast.error(getErrorMessage(error)),
     });
   });

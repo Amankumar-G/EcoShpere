@@ -32,7 +32,7 @@ export function SignupForm() {
 
   const onSubmit = handleSubmit((values) => {
     signup.mutate(values, {
-      onSuccess: () => router.push('/'),
+      onSuccess: () => router.push('/dashboard'),
       onError: (error) => toast.error(getErrorMessage(error)),
     });
   });

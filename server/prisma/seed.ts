@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import { createPrismaPgAdapter } from '../src/prisma/prisma-adapter.factory';
 import { seedPhase0 } from './seeds/phase-0.seed';

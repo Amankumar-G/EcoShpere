@@ -6,6 +6,8 @@ export interface AuthUser {
   name: string | null;
   role: Role;
   departmentId: number | null;
+  /** Not yet returned by GET /auth/me — optional until the server exposes it. */
+  xp?: number;
 }
 
 export interface AuthResponse {
