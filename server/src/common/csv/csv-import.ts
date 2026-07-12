@@ -23,7 +23,7 @@ export function parseCsv(csv: string): Record<string, string>[] {
       columns: true,
       trim: true,
       skip_empty_lines: true,
-    }) as Record<string, string>[];
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Invalid CSV';
     throw new BadRequestException(`Could not parse CSV: ${message}`);
