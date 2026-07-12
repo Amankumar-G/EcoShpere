@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { BackgroundPaths } from '@/components/ui/background-paths';
 import { useMe } from '@/data/auth/auth.hooks';
 import { useAuthToken } from '@/hooks/useAuthToken';
 
@@ -12,19 +11,13 @@ export default function Home() {
   const { data: user, isLoading } = useMe();
 
   useEffect(() => {
+    if (isLoading) return;
     if (getToken() && user) {
       router.replace('/dashboard');
+    } else {
+      router.replace('/login');
     }
-  }, [getToken, user, router]);
+  }, [getToken, user, isLoading, router]);
 
-  if (isLoading) return null;
-
-  return (
-    <BackgroundPaths
-      title="Welcome To The Site"
-      subtitle="Enjoy your visit."
-      buttonText="Let's Get Started"
-      href="/login"
-    />
-  );
+  return null;
 }

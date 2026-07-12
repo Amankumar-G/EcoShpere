@@ -68,7 +68,7 @@ export function SignupForm() {
         <Button
           type="submit"
           disabled={signup.isPending}
-          className="w-full rounded-full bg-[#111827] py-2.5 text-white hover:bg-[#374151]"
+          className="w-full rounded-full bg-primary py-2.5 text-primary-foreground hover:bg-primary/80"
         >
           {signup.isPending ? 'Creating account...' : 'Create account'}
         </Button>
