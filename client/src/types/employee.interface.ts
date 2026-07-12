@@ -1,11 +1,14 @@
 import { Role } from '@/types/auth.interface';
 
+export const GENDERS = ['male', 'female', 'other'] as const;
+
 export interface Employee {
   id: number;
   name: string;
   email: string;
   role: Role;
   gender: string | null;
+  dob: string | null;
   homeWorkDistance: number | null;
   xp: number;
   points: number;
@@ -33,5 +36,6 @@ export interface EmployeePayload {
   role?: Role;
   departmentId?: number | null;
   gender?: string | null;
+  dob?: string | null;
   homeWorkDistance?: number | null;
 }

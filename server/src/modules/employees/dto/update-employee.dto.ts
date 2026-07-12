@@ -1,5 +1,6 @@
 import { Role } from '@prisma/client';
 import {
+  IsDateString,
   IsEmail,
   IsEnum,
   IsIn,
@@ -9,6 +10,7 @@ import {
   IsString,
   MinLength,
 } from 'class-validator';
+import { GENDERS } from './create-employee.dto';
 
 export class UpdateEmployeeDto {
   @IsOptional()
@@ -29,8 +31,12 @@ export class UpdateEmployeeDto {
   departmentId?: number | null;
 
   @IsOptional()
-  @IsString()
+  @IsIn(GENDERS)
   gender?: string;
+
+  @IsOptional()
+  @IsDateString()
+  dob?: string;
 
   @IsOptional()
   @IsNumber()

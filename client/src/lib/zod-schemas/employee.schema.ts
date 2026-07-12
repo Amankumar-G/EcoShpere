@@ -1,4 +1,7 @@
 import { z } from 'zod';
+import { GENDERS } from '@/types/employee.interface';
+
+const GENDER_OPTIONS = ['', ...GENDERS] as const;
 
 const baseEmployeeSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -6,7 +9,8 @@ const baseEmployeeSchema = z.object({
   password: z.string(),
   role: z.enum(['admin', 'manager', 'employee']),
   departmentId: z.string(),
-  gender: z.string(),
+  gender: z.enum(GENDER_OPTIONS),
+  dob: z.string(),
   homeWorkDistance: z.string(),
 });
 

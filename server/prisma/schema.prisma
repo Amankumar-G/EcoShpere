@@ -25,6 +25,7 @@ model Employee {
   passwordHash     String
   role             Role      @default(employee)
   gender           String?
+  dob              DateTime?
   homeWorkDistance Decimal?  @db.Decimal(8, 2)
   xp               Int       @default(0)
   points           Int       @default(0)
@@ -35,6 +36,12 @@ model Employee {
 
   headOfDepartments Department[]   @relation("DepartmentHead")
   notifications     Notification[]
+
+  // Phase 1 — operational records
+  expenseRecords   ExpenseRecord[]
+  fleetVehicles    FleetVehicle[]
+  businessTravels  BusinessTravel[]
+  payrollContracts PayrollContract[]
 }
 
 model Department {
@@ -172,4 +179,190 @@ model EmittedEmission {
 
   emissionFactorId Int
   emissionFactor   EmissionFactor @relation(fields: [emissionFactorId], references: [id])
+}
+
+/// ============================================================================
+/// PHASE 1 — OPERATIONAL RECORDS (the emission inputs)
+///
+/// The standalone "mini-ERP" data-entry layer. These models give the Phase 2
+/// emission engine authentic inputs. Employee references are real foreign keys
+/// to the Phase 0 `Employee` model.
+/// ============================================================================
+
+// Purchasable good or service. `uom` is a controlled vocabulary — physical
+// emission factors must match it, so it is validated at the DTO layer.
+model Product {
+  id               Int      @id @default(autoincrement())
+  name             String
+  code             String   @unique
+  uom              String // kWh | L | km | kg | unit | ream | m3 | ...
+  defaultAccountId Int?
+  defaultAccount   Account? @relation(fields: [defaultAccountId], references: [id])
+  status           String   @default("active")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  invoiceLines   InvoiceLine[]
+  expenseRecords ExpenseRecord[]
+
+  @@map("products")
+}
+
+// Vendor / customer. Monetary and physical activity is attributed to a partner.
+model Partner {
+  id        Int      @id @default(autoincrement())
+  name      String
+  type      String // vendor | customer | both
+  email     String?
+  phone     String?
+  address   String?
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  invoices Invoice[]
+
+  @@map("partners")
+}
+
+// Chart-of-accounts entry — what monetary assignation rules attach to.
+model Account {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  name      String
+  type      String // expense | asset | liability | income | equity
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products       Product[]
+  invoiceLines   InvoiceLine[]
+  expenseRecords ExpenseRecord[]
+
+  @@map("accounts")
+}
+
+// Purchase / vendor bill. Posting an invoice is the trigger event for the
+// Phase 2 accounting (Path A) capture path.
+model Invoice {
+  id          Int       @id @default(autoincrement())
+  partnerId   Int
+  partner     Partner   @relation(fields: [partnerId], references: [id])
+  date        DateTime
+  currency    String    @default("INR")
+  status      String    @default("draft") // draft | posted
+  totalAmount Decimal   @default(0) @db.Decimal(14, 2)
+  postedAt    DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  lines InvoiceLine[]
+
+  @@map("invoices")
+}
+
+model InvoiceLine {
+  id          Int      @id @default(autoincrement())
+  invoiceId   Int
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  productId   Int?
+  product     Product? @relation(fields: [productId], references: [id])
+  accountId   Int
+  account     Account  @relation(fields: [accountId], references: [id])
+  description String?
+  quantity    Decimal  @db.Decimal(12, 4)
+  uom         String
+  unitPrice   Decimal  @db.Decimal(14, 4)
+  amount      Decimal  @db.Decimal(14, 2) // enforced = quantity * unitPrice
+
+  @@map("invoice_lines")
+}
+
+// Employee-submitted expense — same posting semantics as an invoice line, with
+// a manager approval step in front. `employeeId` is a loose FK to Phase 0.
+model ExpenseRecord {
+  id          Int       @id @default(autoincrement())
+  employeeId  Int
+  employee    Employee  @relation(fields: [employeeId], references: [id])
+  date        DateTime
+  accountId   Int?
+  account     Account?  @relation(fields: [accountId], references: [id])
+  productId   Int?
+  product     Product?  @relation(fields: [productId], references: [id])
+  description String?
+  quantity    Decimal?  @db.Decimal(12, 4)
+  uom         String?
+  amount      Decimal   @db.Decimal(14, 2)
+  // draft | submitted | approved | rejected | posted
+  status      String    @default("draft")
+  postedAt    DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("expense_records")
+}
+
+// Fleet ‣ Configuration ‣ Models — CO2 emissions per vehicle model (kgCO2e/km).
+model FleetVehicleModel {
+  id           Int      @id @default(autoincrement())
+  name         String
+  co2Emissions Decimal  @db.Decimal(10, 4) // kgCO2e per km
+  status       String   @default("active")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  vehicles FleetVehicle[]
+
+  @@map("fleet_vehicle_models")
+}
+
+// An employee's assigned vehicle. Only one may be active (endDate null) per
+// employee at a time — enforced in the service layer.
+model FleetVehicle {
+  id         Int               @id @default(autoincrement())
+  employeeId Int
+  employee   Employee          @relation(fields: [employeeId], references: [id])
+  modelId    Int
+  model      FleetVehicleModel @relation(fields: [modelId], references: [id])
+  startDate  DateTime
+  endDate    DateTime?
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  @@map("fleet_vehicles")
+}
+
+// One-off employee travel — feeds Scope 3 Cat 6 via a factor pick in Phase 2.
+model BusinessTravel {
+  id          Int      @id @default(autoincrement())
+  employeeId  Int
+  employee    Employee @relation(fields: [employeeId], references: [id])
+  mode        String // flight | train | car | bus
+  origin      String?
+  destination String?
+  distanceKm  Decimal? @db.Decimal(10, 2)
+  date        DateTime
+  purpose     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("business_travels")
+}
+
+// Payroll contract data needed for the pay-gap formula (same job, by gender).
+model PayrollContract {
+  id              Int       @id @default(autoincrement())
+  employeeId      Int
+  employee        Employee  @relation(fields: [employeeId], references: [id])
+  jobPosition     String
+  contractType    String // permanent | temporary | intern | contract
+  leadershipLevel String? // management | non_management | administrative
+  country         String?
+  wage            Decimal   @db.Decimal(12, 2)
+  startDate       DateTime
+  endDate         DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("payroll_contracts")
 }

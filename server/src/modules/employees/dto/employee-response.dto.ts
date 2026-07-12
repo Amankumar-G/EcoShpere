@@ -6,6 +6,7 @@ export class EmployeeResponseDto {
   email: string;
   role: Role;
   gender: string | null;
+  dob: Date | null;
   homeWorkDistance: number | null;
   xp: number;
   points: number;

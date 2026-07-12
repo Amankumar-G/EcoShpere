@@ -18,6 +18,7 @@ import { useEmployeeCount } from '@/data/employees/employees.hooks';
 import {
   canAccessNavItem,
   primaryNavItems,
+  recordsSubNavItems,
   settingsSubNavItems,
 } from '@/components/shell/nav-items';
 import { Role } from '@/types/auth.interface';
@@ -42,7 +43,12 @@ export function AppSidebarNav({ role }: { role: Role }) {
             .filter((item) => canAccessNavItem(item, role))
             .map((item) => {
               const isActive = pathname.startsWith(item.href);
-              const isSettings = item.label === 'Settings';
+              const subItems =
+                item.label === 'Settings'
+                  ? settingsSubNavItems
+                  : item.label === 'Records'
+                    ? recordsSubNavItems
+                    : undefined;
 
               return (
                 <SidebarMenuItem key={item.href}>
@@ -56,33 +62,35 @@ export function AppSidebarNav({ role }: { role: Role }) {
                       </Link>
                     }
                   />
-                  {isSettings && isActive && (
+                  {subItems && isActive && (
                     <SidebarMenuSub>
-                      {settingsSubNavItems.map((subItem) => {
-                        const count =
-                          subItem.label === 'Employees'
-                            ? employeeCount.data
-                            : subItem.label === 'Departments'
-                              ? departmentCount.data
-                              : undefined;
+                      {subItems
+                        .filter((subItem) => canAccessNavItem(subItem, role))
+                        .map((subItem) => {
+                          const count =
+                            subItem.label === 'Employees'
+                              ? employeeCount.data
+                              : subItem.label === 'Departments'
+                                ? departmentCount.data
+                                : undefined;
 
-                        return (
-                          <SidebarMenuSubItem key={subItem.href}>
-                            <SidebarMenuSubButton
-                              isActive={pathname === subItem.href}
-                              render={
-                                <Link href={subItem.href}>
-                                  <subItem.icon />
-                                  <span>{subItem.label}</span>
-                                </Link>
-                              }
-                            />
-                            {count !== undefined && (
-                              <SidebarMenuBadge>{count}</SidebarMenuBadge>
-                            )}
-                          </SidebarMenuSubItem>
-                        );
-                      })}
+                          return (
+                            <SidebarMenuSubItem key={subItem.href}>
+                              <SidebarMenuSubButton
+                                isActive={pathname === subItem.href}
+                                render={
+                                  <Link href={subItem.href}>
+                                    <subItem.icon />
+                                    <span>{subItem.label}</span>
+                                  </Link>
+                                }
+                              />
+                              {count !== undefined && (
+                                <SidebarMenuBadge>{count}</SidebarMenuBadge>
+                              )}
+                            </SidebarMenuSubItem>
+                          );
+                        })}
                     </SidebarMenuSub>
                   )}
                 </SidebarMenuItem>
