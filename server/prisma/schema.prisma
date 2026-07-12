@@ -35,6 +35,12 @@ model Employee {
 
   headOfDepartments Department[]   @relation("DepartmentHead")
   notifications     Notification[]
+
+  // Phase 1 — operational records
+  expenseRecords   ExpenseRecord[]
+  fleetVehicles    FleetVehicle[]
+  businessTravels  BusinessTravel[]
+  payrollContracts PayrollContract[]
 }
 
 model Department {
@@ -81,13 +87,8 @@ model Notification {
 /// PHASE 1 — OPERATIONAL RECORDS (the emission inputs)
 ///
 /// The standalone "mini-ERP" data-entry layer. These models give the Phase 2
-/// emission engine authentic inputs.
-///
-/// NOTE ON EMPLOYEE REFERENCES: `Employee` and `Department` are Phase 0 models,
-/// owned and built by a separate track. Until they exist, employee references
-/// here are stored as loose `Int` columns (`employeeId`) with no `@relation` —
-/// the same "loose FK" pattern the Database Design doc uses. Once Phase 0 lands,
-/// these are upgraded to real foreign keys with relations.
+/// emission engine authentic inputs. Employee references are real foreign keys
+/// to the Phase 0 `Employee` model.
 /// ============================================================================
 
 // Purchasable good or service. `uom` is a controlled vocabulary — physical
@@ -183,7 +184,8 @@ model InvoiceLine {
 // a manager approval step in front. `employeeId` is a loose FK to Phase 0.
 model ExpenseRecord {
   id          Int       @id @default(autoincrement())
-  employeeId  Int // loose FK -> Employee (Phase 0)
+  employeeId  Int
+  employee    Employee  @relation(fields: [employeeId], references: [id])
   date        DateTime
   accountId   Int?
   account     Account?  @relation(fields: [accountId], references: [id])
@@ -217,10 +219,11 @@ model FleetVehicleModel {
 }
 
 // An employee's assigned vehicle. Only one may be active (endDate null) per
-// employee at a time — enforced in the service layer. `employeeId` loose FK.
+// employee at a time — enforced in the service layer.
 model FleetVehicle {
   id         Int               @id @default(autoincrement())
-  employeeId Int // loose FK -> Employee (Phase 0)
+  employeeId Int
+  employee   Employee          @relation(fields: [employeeId], references: [id])
   modelId    Int
   model      FleetVehicleModel @relation(fields: [modelId], references: [id])
   startDate  DateTime
@@ -234,7 +237,8 @@ model FleetVehicle {
 // One-off employee travel — feeds Scope 3 Cat 6 via a factor pick in Phase 2.
 model BusinessTravel {
   id          Int      @id @default(autoincrement())
-  employeeId  Int // loose FK -> Employee (Phase 0)
+  employeeId  Int
+  employee    Employee @relation(fields: [employeeId], references: [id])
   mode        String // flight | train | car | bus
   origin      String?
   destination String?
@@ -248,10 +252,10 @@ model BusinessTravel {
 }
 
 // Payroll contract data needed for the pay-gap formula (same job, by gender).
-// `employeeId` loose FK to Phase 0.
 model PayrollContract {
   id              Int       @id @default(autoincrement())
-  employeeId      Int // loose FK -> Employee (Phase 0)
+  employeeId      Int
+  employee        Employee  @relation(fields: [employeeId], references: [id])
   jobPosition     String
   contractType    String // permanent | temporary
   leadershipLevel String? // management | non_management
