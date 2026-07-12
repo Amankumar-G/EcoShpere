@@ -53,7 +53,7 @@ export class InvoiceService {
       data: {
         partnerId: dto.partnerId,
         date: new Date(dto.date),
-        currency: dto.currency ?? 'EUR',
+        currency: dto.currency ?? 'INR',
         totalAmount: this.totalOf(lines),
         lines: { create: lines },
       },
