@@ -6,6 +6,7 @@ import configuration from './config/configuration';
 import { AuthModule } from './modules/auth/auth.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
+import { EmissionFactorsModule } from './modules/emission-factors/emission-factors.module';
 import { EmissionScopesModule } from './modules/emission-scopes/emission-scopes.module';
 import { EmployeesModule } from './modules/employees/employees.module';
 import { EsgConfigModule } from './modules/esg-config/esg-config.module';
@@ -24,6 +25,7 @@ import { PrismaModule } from './prisma/prisma.module';
     AuthModule,
     CategoriesModule,
     DepartmentsModule,
+    EmissionFactorsModule,
     EmissionScopesModule,
     EmployeesModule,
     EsgConfigModule,

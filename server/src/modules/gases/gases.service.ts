@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Gas, Prisma } from '@prisma/client';
+import { EmissionFactorsService } from '../emission-factors/emission-factors.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateGasDto } from './dto/create-gas.dto';
 import { GasResponseDto } from './dto/gas-response.dto';
@@ -11,7 +12,10 @@ import { UpdateGasDto } from './dto/update-gas.dto';
 
 @Injectable()
 export class GasesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly emissionFactorsService: EmissionFactorsService,
+  ) {}
 
   async list(): Promise<GasResponseDto[]> {
     const gases = await this.prisma.gas.findMany();
@@ -29,8 +33,13 @@ export class GasesService {
   }
 
   async update(id: number, dto: UpdateGasDto): Promise<GasResponseDto> {
-    await this.findByIdOrThrow(id);
+    const existing = await this.findByIdOrThrow(id);
     const updated = await this.updateGas(id, dto);
+
+    if (dto.gwp !== undefined && dto.gwp !== Number(existing.gwp)) {
+      await this.emissionFactorsService.recomputeFactorsForGas(id);
+    }
+
     return toGasResponse(updated);
   }
 

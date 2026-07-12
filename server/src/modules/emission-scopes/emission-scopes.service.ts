@@ -12,7 +12,7 @@ import { UpdateEmissionScopeDto } from './dto/update-emission-scope.dto';
 import { EmissionScopeTreeService } from './emission-scope-tree.service';
 
 const EMISSION_SCOPE_WITH_COUNT = {
-  include: { _count: { select: { children: true } } },
+  include: { _count: { select: { children: true, emissionFactors: true } } },
 } satisfies Prisma.EmissionScopeDefaultArgs;
 
 type EmissionScopeWithCount = Prisma.EmissionScopeGetPayload<
@@ -76,8 +76,11 @@ export class EmissionScopesService {
       );
     }
 
-    // TODO(Slice 2): also block deletion when EmissionFactor rows link to
-    // this scope, once the EmissionFactor model and relation exist.
+    if (scope._count.emissionFactors > 0) {
+      throw new BadRequestException(
+        'Cannot delete an emission scope that has linked emission factors',
+      );
+    }
 
     await this.prisma.emissionScope.delete({ where: { id } });
   }

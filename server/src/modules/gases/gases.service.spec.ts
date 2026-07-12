@@ -4,6 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
 import { PrismaService } from '../../prisma/prisma.service';
 import { GasesService } from './gases.service';
+import { EmissionFactorsService } from '../emission-factors/emission-factors.service';
 
 function uniqueSymbolViolation(): Prisma.PrismaClientKnownRequestError {
   return new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
@@ -35,6 +36,10 @@ describe('GasesService', () => {
     };
   };
 
+  let emissionFactorsService: {
+    recomputeFactorsForGas: ReturnType<typeof vi.fn>;
+  };
+
   beforeEach(async () => {
     prisma = {
       gas: {
@@ -45,9 +50,17 @@ describe('GasesService', () => {
         delete: vi.fn(),
       },
     };
+    emissionFactorsService = { recomputeFactorsForGas: vi.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [GasesService, { provide: PrismaService, useValue: prisma }],
+      providers: [
+        GasesService,
+        { provide: PrismaService, useValue: prisma },
+        {
+          provide: EmissionFactorsService,
+          useValue: emissionFactorsService,
+        },
+      ],
     }).compile();
 
     service = module.get<GasesService>(GasesService);
@@ -89,5 +102,27 @@ describe('GasesService', () => {
     await expect(
       service.create({ name: 'Carbon Dioxide', symbol: 'CO2', gwp: 1 }),
     ).rejects.toBe(otherError);
+  });
+
+  it('recomputes dependent factors when the GWP actually changes', async () => {
+    prisma.gas.findUnique.mockResolvedValue(gasRow({ gwp: 1 }));
+    prisma.gas.update.mockResolvedValue(gasRow({ gwp: 28 }));
+
+    await service.update(1, { gwp: 28 });
+
+    expect(emissionFactorsService.recomputeFactorsForGas).toHaveBeenCalledWith(
+      1,
+    );
+  });
+
+  it('does not recompute factors when the update leaves GWP unchanged', async () => {
+    prisma.gas.findUnique.mockResolvedValue(gasRow({ gwp: 1 }));
+    prisma.gas.update.mockResolvedValue(gasRow({ name: 'CO2 renamed' }));
+
+    await service.update(1, { name: 'CO2 renamed' });
+
+    expect(
+      emissionFactorsService.recomputeFactorsForGas,
+    ).not.toHaveBeenCalled();
   });
 });
