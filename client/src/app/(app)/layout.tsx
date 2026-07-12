@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Spinner } from '@/components/ui/spinner';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
@@ -17,15 +17,28 @@ export default function AppShellLayout({
   const router = useRouter();
   const { getToken } = useAuthToken();
   const { data: user, isLoading, isError } = useMe();
+  // Auth state depends on localStorage, which isn't available during SSR.
+  // Defer the redirect decision until after mount so the first client render
+  // matches the server-rendered markup (avoids a hydration mismatch).
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
-  const hasToken = Boolean(getToken());
-  const isUnauthenticated = !hasToken || isError;
+  const hasToken = mounted && Boolean(getToken());
+  const isUnauthenticated = mounted && (!hasToken || isError);
 
   useEffect(() => {
     if (isUnauthenticated) {
       router.replace('/login');
     }
   }, [isUnauthenticated, router]);
+
+  if (!mounted) {
+    return (
+      <div className="flex min-h-svh items-center justify-center">
+        <Spinner className="size-6" />
+      </div>
+    );
+  }
 
   if (isUnauthenticated) {
     return null;
