@@ -16,6 +16,7 @@ import { FleetModule } from './modules/fleet/fleet.module';
 import { InvoiceModule } from './modules/invoice/invoice.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { PartnerModule } from './modules/partner/partner.module';
+import { PayrollModule } from './modules/payroll/payroll.module';
 import { ProductModule } from './modules/product/product.module';
 import { PrismaModule } from './prisma/prisma.module';
 
@@ -41,6 +42,7 @@ import { PrismaModule } from './prisma/prisma.module';
     ExpenseModule,
     FleetModule,
     BusinessTravelModule,
+    PayrollModule,
   ],
   controllers: [AppController],
   providers: [AppService],
