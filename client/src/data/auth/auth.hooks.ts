@@ -21,9 +21,14 @@ export const useLogin = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: LoginPayload) => login(payload),
-    onSuccess: ({ accessToken }) => {
+    onSuccess: async ({ accessToken }) => {
       setToken(accessToken);
-      queryClient.invalidateQueries({ queryKey: authQueryKeys.me });
+      // Eagerly fetch and cache the current user so the app shell renders
+      // authenticated immediately on navigation, instead of racing a fresh
+      // `useMe()` mount against an as-yet-unpopulated query cache.
+      await queryClient
+        .fetchQuery({ queryKey: authQueryKeys.me, queryFn: getMe })
+        .catch(() => {});
     },
   });
 };
