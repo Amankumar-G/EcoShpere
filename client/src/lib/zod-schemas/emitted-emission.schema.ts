@@ -11,6 +11,7 @@ export const emittedEmissionSchema = z.object({
   date: dateFieldSchema,
   departmentId: z.string().min(1, 'Department is required'),
   evidenceUrl: z.string().url('Enter a valid URL').optional().or(z.literal('')),
+  businessTravelRefId: z.string().optional(),
 });
 
 export type EmittedEmissionSchema = z.infer<typeof emittedEmissionSchema>;

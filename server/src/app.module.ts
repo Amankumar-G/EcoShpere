@@ -5,6 +5,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import configuration from './config/configuration';
 import { AccountModule } from './modules/account/account.module';
+import { AccountingCaptureModule } from './modules/accounting-capture/accounting-capture.module';
+import { AssignationRulesModule } from './modules/assignation-rules/assignation-rules.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BusinessTravelModule } from './modules/business-travel/business-travel.module';
 import { CategoriesModule } from './modules/categories/categories.module';
@@ -16,6 +18,7 @@ import { EmployeesModule } from './modules/employees/employees.module';
 import { EsgConfigModule } from './modules/esg-config/esg-config.module';
 import { ExpenseModule } from './modules/expense/expense.module';
 import { FleetModule } from './modules/fleet/fleet.module';
+import { FleetCommutingModule } from './modules/fleet-commuting/fleet-commuting.module';
 import { GasesModule } from './modules/gases/gases.module';
 import { InvoiceModule } from './modules/invoice/invoice.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
@@ -33,6 +36,8 @@ import { PrismaModule } from './prisma/prisma.module';
     }),
     EventEmitterModule.forRoot(),
     PrismaModule,
+    AccountingCaptureModule,
+    AssignationRulesModule,
     AuthModule,
     CategoriesModule,
     DepartmentsModule,
@@ -51,6 +56,7 @@ import { PrismaModule } from './prisma/prisma.module';
     InvoiceModule,
     ExpenseModule,
     FleetModule,
+    FleetCommutingModule,
     BusinessTravelModule,
     PayrollModule,
   ],

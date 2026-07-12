@@ -53,12 +53,16 @@ export class EmittedEmissionsService {
     );
     assertFactorHasGasLines(factor);
     await this.assertDepartmentInScope(actor, dto.departmentId);
+    if (dto.businessTravelRefId !== undefined) {
+      await this.assertBusinessTravelExists(dto.businessTravelRefId);
+    }
 
     const created = await this.prisma.emittedEmission.create({
       data: {
         name: dto.name,
         departmentId: dto.departmentId,
         sourceType: EmissionSourceType.manual,
+        sourceRefId: dto.businessTravelRefId ?? null,
         emissionFactorId: dto.emissionFactorId,
         quantity: dto.quantity,
         co2eValue: dto.quantity * factor.value,
@@ -138,6 +142,19 @@ export class EmittedEmissionsService {
     return subtreeIds.includes(departmentId) ? [departmentId] : [];
   }
 
+  private async assertBusinessTravelExists(
+    businessTravelId: number,
+  ): Promise<void> {
+    const record = await this.prisma.businessTravel.findUnique({
+      where: { id: businessTravelId },
+    });
+    if (!record) {
+      throw new BadRequestException(
+        `Business travel record ${businessTravelId} not found`,
+      );
+    }
+  }
+
   private async assertDepartmentInScope(
     actor: AuthUser,
     departmentId: number,
@@ -213,12 +230,18 @@ function resolveGroupKey(
   groupBy: FootprintGroupBy,
 ): { key: number | string; label: string } {
   if (groupBy === 'scope') {
+    if (!emission.emissionFactor) {
+      return { key: 'unassigned', label: 'Unassigned' };
+    }
     return {
       key: emission.emissionFactor.scope.id,
       label: emission.emissionFactor.scope.name,
     };
   }
   if (groupBy === 'department') {
+    if (emission.departmentId === null || !emission.department) {
+      return { key: 'unassigned', label: 'Unassigned' };
+    }
     return { key: emission.departmentId, label: emission.department.name };
   }
   const period = formatPeriod(emission.date);

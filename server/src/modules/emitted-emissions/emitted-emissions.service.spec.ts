@@ -63,6 +63,9 @@ describe('EmittedEmissionsService', () => {
       findMany: ReturnType<typeof vi.fn>;
       create: ReturnType<typeof vi.fn>;
     };
+    businessTravel: {
+      findUnique: ReturnType<typeof vi.fn>;
+    };
   };
   let emissionFactorsService: { findOne: ReturnType<typeof vi.fn> };
   let departmentScope: { resolveSubtreeIds: ReturnType<typeof vi.fn> };
@@ -74,6 +77,7 @@ describe('EmittedEmissionsService', () => {
   beforeEach(async () => {
     prisma = {
       emittedEmission: { findMany: vi.fn(), create: vi.fn() },
+      businessTravel: { findUnique: vi.fn() },
     };
     emissionFactorsService = { findOne: vi.fn() };
     departmentScope = { resolveSubtreeIds: vi.fn() };
@@ -216,6 +220,43 @@ describe('EmittedEmissionsService', () => {
     expect(prisma.emittedEmission.findMany).toHaveBeenCalledWith({
       where: { departmentId: { in: [] } },
     });
+  });
+
+  it('links a manual entry to a business travel record via sourceRefId', async () => {
+    emissionFactorsService.findOne.mockResolvedValue(factorDto());
+    prisma.businessTravel.findUnique.mockResolvedValue({ id: 42 });
+    prisma.emittedEmission.create.mockResolvedValue(emissionRow());
+
+    await service.create(adminActor, {
+      name: 'Flight to conference',
+      emissionFactorId: 1,
+      quantity: 1,
+      date: new Date('2026-01-15'),
+      departmentId: 1,
+      businessTravelRefId: 42,
+    });
+
+    expect(prisma.emittedEmission.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ sourceRefId: 42 }),
+      }),
+    );
+  });
+
+  it('rejects a manual entry linking a business travel record that does not exist', async () => {
+    emissionFactorsService.findOne.mockResolvedValue(factorDto());
+    prisma.businessTravel.findUnique.mockResolvedValue(null);
+
+    await expect(
+      service.create(adminActor, {
+        name: 'Flight to conference',
+        emissionFactorId: 1,
+        quantity: 1,
+        date: new Date('2026-01-15'),
+        departmentId: 1,
+        businessTravelRefId: 999,
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('groups footprint totals by department and sums co2eValue', async () => {

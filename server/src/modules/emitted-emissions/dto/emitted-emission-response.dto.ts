@@ -3,10 +3,10 @@ import { EmissionSourceType } from '@prisma/client';
 export class EmittedEmissionResponseDto {
   id: number;
   name: string;
-  departmentId: number;
+  departmentId: number | null;
   sourceType: EmissionSourceType;
   sourceRefId: number | null;
-  emissionFactorId: number;
+  emissionFactorId: number | null;
   employeeId: number | null;
   quantity: number;
   co2eValue: number;

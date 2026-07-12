@@ -9,6 +9,7 @@ import {
   Database,
   FlaskConical,
   Gauge,
+  GitMerge,
   Leaf,
   ListTree,
   Package,
@@ -82,6 +83,12 @@ export const settingsSubNavItems: SubNavItem[] = [
     label: 'Source Databases',
     href: '/settings/esg-configuration/source-databases',
     icon: Database,
+  },
+  {
+    label: 'Assignation Rules',
+    href: '/settings/esg-configuration/assignation-rules',
+    icon: GitMerge,
+    roles: ['admin'],
   },
 ];
 

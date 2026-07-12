@@ -32,6 +32,7 @@ import { useEmissionFactors } from '@/data/emission-factors/emission-factors.hoo
 import { useEmissionScopeTree } from '@/data/emission-scopes/emission-scopes.hooks';
 import { useDepartments } from '@/data/departments/departments.hooks';
 import { useCreateEmittedEmission } from '@/data/emitted-emissions/emitted-emissions.hooks';
+import { useBusinessTravels } from '@/data/business-travel/business-travel.hooks';
 import { buildScopePathMap } from '@/lib/emission-scope-path';
 import {
   EmittedEmissionSchema,
@@ -40,6 +41,7 @@ import {
 
 type FactorOption = { value: number; label: string };
 type FactorGroup = { value: string; items: FactorOption[] };
+type BusinessTravelOption = { value: number; label: string };
 
 function useGroupedFactorOptions() {
   const { data: factors } = useEmissionFactors();
@@ -117,16 +119,63 @@ function FactorPicker({
   );
 }
 
+function BusinessTravelPicker({
+  value,
+  onChange,
+  options,
+}: {
+  value: string | undefined;
+  onChange: (id: string) => void;
+  options: BusinessTravelOption[];
+}) {
+  const selected = React.useMemo(
+    () => options.find((option) => String(option.value) === value) ?? null,
+    [options, value],
+  );
+
+  return (
+    <Field>
+      <FieldLabel htmlFor="emission-business-travel">
+        Link to Business Travel record (optional)
+      </FieldLabel>
+      <Combobox<BusinessTravelOption>
+        items={options}
+        value={selected}
+        onValueChange={(option) => onChange(option ? String(option.value) : '')}
+      >
+        <ComboboxInput
+          id="emission-business-travel"
+          placeholder="Select a business travel record"
+        />
+        <ComboboxContent>
+          <ComboboxEmpty>No business travel records found.</ComboboxEmpty>
+          <ComboboxList>
+            <ComboboxCollection>
+              {(item: BusinessTravelOption) => (
+                <ComboboxItem key={item.value} value={item}>
+                  {item.label}
+                </ComboboxItem>
+              )}
+            </ComboboxCollection>
+          </ComboboxList>
+        </ComboboxContent>
+      </Combobox>
+    </Field>
+  );
+}
+
 function ManualEntryFormFields({
   form,
   factorGroups,
   unitOfMeasure,
   departments,
+  businessTravelOptions,
 }: {
   form: ReturnType<typeof useForm<EmittedEmissionSchema>>;
   factorGroups: FactorGroup[];
   unitOfMeasure?: string;
   departments: Array<{ id: number; name: string }>;
+  businessTravelOptions: BusinessTravelOption[];
 }) {
   const {
     register,
@@ -199,6 +248,13 @@ function ManualEntryFormFields({
         />
         <FieldError errors={[errors.evidenceUrl]} />
       </Field>
+      <BusinessTravelPicker
+        value={watch('businessTravelRefId')}
+        onChange={(id) =>
+          setValue('businessTravelRefId', id, { shouldValidate: true })
+        }
+        options={businessTravelOptions}
+      />
     </>
   );
 }
@@ -215,6 +271,7 @@ export function useManualEntryForm(onClose: () => void) {
       date: new Date(),
       departmentId: '',
       evidenceUrl: '',
+      businessTravelRefId: '',
     },
   });
 
@@ -226,6 +283,9 @@ export function useManualEntryForm(onClose: () => void) {
       date: values.date,
       departmentId: Number(values.departmentId),
       evidenceUrl: values.evidenceUrl || undefined,
+      businessTravelRefId: values.businessTravelRefId
+        ? Number(values.businessTravelRefId)
+        : undefined,
     });
     form.reset();
     onClose();
@@ -243,11 +303,19 @@ export function ManualEntryFormDialog({
 }) {
   const { factors, factorGroups } = useGroupedFactorOptions();
   const { data: departments } = useDepartments(true);
+  const { data: businessTravels } = useBusinessTravels();
   const { form, onSubmit } = useManualEntryForm(() => onOpenChange(false));
 
   const selectedFactor = factors.find(
     (factor) => String(factor.id) === form.watch('emissionFactorId'),
   );
+
+  const businessTravelOptions: BusinessTravelOption[] = (
+    businessTravels ?? []
+  ).map((travel) => ({
+    value: travel.id,
+    label: `${travel.mode} — ${travel.origin ?? '—'} → ${travel.destination ?? '—'} — ${travel.date.slice(0, 10)}`,
+  }));
 
   return (
     <FormDialog
@@ -263,6 +331,7 @@ export function ManualEntryFormDialog({
         factorGroups={factorGroups}
         unitOfMeasure={selectedFactor?.unitOfMeasure}
         departments={departments ?? []}
+        businessTravelOptions={businessTravelOptions}
       />
     </FormDialog>
   );

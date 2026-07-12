@@ -24,4 +24,5 @@ export interface EmittedEmissionPayload {
   date: Date;
   departmentId: number;
   evidenceUrl?: string;
+  businessTravelRefId?: number;
 }

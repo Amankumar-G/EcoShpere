@@ -30,4 +30,9 @@ export class CreateEmittedEmissionDto {
   @IsOptional()
   @IsUrl()
   evidenceUrl?: string;
+
+  /** Optional link to a Phase 1 BusinessTravel record (Scope 3 Cat 6). Stored on sourceRefId. */
+  @IsOptional()
+  @IsInt()
+  businessTravelRefId?: number;
 }
