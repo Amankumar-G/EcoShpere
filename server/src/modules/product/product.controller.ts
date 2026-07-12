@@ -8,22 +8,25 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
+import { Role } from '@prisma/client';
 import { ImportCsvDto } from '../../common/csv/import-csv.dto';
-import { Authenticated } from '../auth/decorators/authenticated.decorator';
+import { Auth } from '../auth/decorators/auth.decorator';
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
 import { ProductService } from './product.service';
 
 @Controller('products')
-@Authenticated()
+@Auth()
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post()
+  @Auth(Role.admin, Role.manager)
   create(@Body() dto: CreateProductDto) {
     return this.productService.create(dto);
   }
 
   @Post('import')
+  @Auth(Role.admin, Role.manager)
   import(@Body() dto: ImportCsvDto) {
     return this.productService.importCsv(dto.csv);
   }
@@ -39,11 +42,13 @@ export class ProductController {
   }
 
   @Patch(':id')
+  @Auth(Role.admin, Role.manager)
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateProductDto) {
     return this.productService.update(id, dto);
   }
 
   @Delete(':id')
+  @Auth(Role.admin, Role.manager)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.productService.remove(id);
   }
