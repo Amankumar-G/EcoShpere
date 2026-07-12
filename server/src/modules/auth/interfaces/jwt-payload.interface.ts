@@ -13,4 +13,9 @@ export interface AuthUser {
   name: string | null;
   role: Role;
   departmentId: number | null;
+  // Enriched by JwtStrategy on every authenticated request (optional so the
+  // login-time principal and test fixtures need not construct them).
+  departmentName?: string | null;
+  xp?: number;
+  points?: number;
 }

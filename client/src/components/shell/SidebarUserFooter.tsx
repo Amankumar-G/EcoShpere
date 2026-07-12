@@ -2,7 +2,6 @@
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { SidebarFooter } from '@/components/ui/sidebar';
-import { useDepartments } from '@/data/departments/departments.hooks';
 import { deriveLevelProgress } from '@/lib/gamification/level';
 import { AuthUser } from '@/types/auth.interface';
 
@@ -15,24 +14,14 @@ const initialsFor = (name: string | null, email: string): string => {
     .join('');
 };
 
-const resolveDepartmentLabel = (
-  departmentId: number | null,
-  departments: { id: number; name: string }[] | undefined,
-): string => {
-  if (departmentId === null) return 'No department';
-  const match = departments?.find(
-    (department) => department.id === departmentId,
-  );
-  return match?.name ?? `Department #${departmentId}`;
+const resolveDepartmentLabel = (user: AuthUser): string => {
+  if (user.departmentName) return user.departmentName;
+  if (user.departmentId === null) return 'No department';
+  return `Department #${user.departmentId}`;
 };
 
 export function SidebarUserFooter({ user }: { user: AuthUser }) {
-  const canResolveDepartment = user.role === 'admin' || user.role === 'manager';
-  const { data: departments } = useDepartments(canResolveDepartment);
-  const departmentLabel = resolveDepartmentLabel(
-    user.departmentId,
-    departments,
-  );
+  const departmentLabel = resolveDepartmentLabel(user);
   const { level, xp } = deriveLevelProgress(user.xp);
 
   return (

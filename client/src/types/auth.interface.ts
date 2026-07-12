@@ -6,8 +6,10 @@ export interface AuthUser {
   name: string | null;
   role: Role;
   departmentId: number | null;
-  /** Not yet returned by GET /auth/me — optional until the server exposes it. */
+  /** Enriched by GET /auth/me on every authenticated request. */
+  departmentName?: string | null;
   xp?: number;
+  points?: number;
 }
 
 export interface AuthResponse {
