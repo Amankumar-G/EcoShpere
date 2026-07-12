@@ -7,3 +7,10 @@ export interface Department {
   employeeCount: number;
   status: string;
 }
+
+export interface DepartmentPayload {
+  name: string;
+  code: string;
+  parentId?: number | null;
+  headEmployeeId?: number | null;
+}

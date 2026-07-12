@@ -25,3 +25,13 @@ export interface EmployeeQuery {
   order?: 'asc' | 'desc';
   filter?: string;
 }
+
+export interface EmployeePayload {
+  name: string;
+  email: string;
+  password: string;
+  role?: Role;
+  departmentId?: number | null;
+  gender?: string | null;
+  homeWorkDistance?: number | null;
+}

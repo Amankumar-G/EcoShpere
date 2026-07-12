@@ -2,8 +2,10 @@ import {
   Building2,
   Gauge,
   Leaf,
+  ListTree,
   Settings,
   Shield,
+  SlidersHorizontal,
   Trophy,
   Users2,
   FileBarChart,
@@ -42,6 +44,12 @@ export interface SettingsSubNavItem {
 export const settingsSubNavItems: SettingsSubNavItem[] = [
   { label: 'Departments', href: '/settings/departments', icon: Building2 },
   { label: 'Employees', href: '/settings/employees', icon: Users2 },
+  { label: 'Categories', href: '/settings/categories', icon: ListTree },
+  {
+    label: 'ESG Configuration',
+    href: '/settings/esg-configuration',
+    icon: SlidersHorizontal,
+  },
 ];
 
 export const canAccessNavItem = (item: NavItem, role: Role): boolean =>
