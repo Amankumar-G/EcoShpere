@@ -22,3 +22,191 @@ model User {
 
   @@map("users")
 }
+
+/// ============================================================================
+/// PHASE 1 — OPERATIONAL RECORDS (the emission inputs)
+///
+/// The standalone "mini-ERP" data-entry layer. These models give the Phase 2
+/// emission engine authentic inputs.
+///
+/// NOTE ON EMPLOYEE REFERENCES: `Employee` and `Department` are Phase 0 models,
+/// owned and built by a separate track. Until they exist, employee references
+/// here are stored as loose `Int` columns (`employeeId`) with no `@relation` —
+/// the same "loose FK" pattern the Database Design doc uses. Once Phase 0 lands,
+/// these are upgraded to real foreign keys with relations.
+/// ============================================================================
+
+// Purchasable good or service. `uom` is a controlled vocabulary — physical
+// emission factors must match it, so it is validated at the DTO layer.
+model Product {
+  id               Int      @id @default(autoincrement())
+  name             String
+  code             String   @unique
+  uom              String // kWh | L | km | kg | unit | ream | m3 | ...
+  defaultAccountId Int?
+  defaultAccount   Account? @relation(fields: [defaultAccountId], references: [id])
+  status           String   @default("active")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  invoiceLines   InvoiceLine[]
+  expenseRecords ExpenseRecord[]
+
+  @@map("products")
+}
+
+// Vendor / customer. Monetary and physical activity is attributed to a partner.
+model Partner {
+  id        Int      @id @default(autoincrement())
+  name      String
+  type      String // vendor | customer | both
+  email     String?
+  phone     String?
+  address   String?
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  invoices Invoice[]
+
+  @@map("partners")
+}
+
+// Chart-of-accounts entry — what monetary assignation rules attach to.
+model Account {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  name      String
+  type      String // expense | asset | liability | income | equity
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products       Product[]
+  invoiceLines   InvoiceLine[]
+  expenseRecords ExpenseRecord[]
+
+  @@map("accounts")
+}
+
+// Purchase / vendor bill. Posting an invoice is the trigger event for the
+// Phase 2 accounting (Path A) capture path.
+model Invoice {
+  id          Int       @id @default(autoincrement())
+  partnerId   Int
+  partner     Partner   @relation(fields: [partnerId], references: [id])
+  date        DateTime
+  currency    String    @default("EUR")
+  status      String    @default("draft") // draft | posted
+  totalAmount Decimal   @default(0) @db.Decimal(14, 2)
+  postedAt    DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  lines InvoiceLine[]
+
+  @@map("invoices")
+}
+
+model InvoiceLine {
+  id          Int      @id @default(autoincrement())
+  invoiceId   Int
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  productId   Int?
+  product     Product? @relation(fields: [productId], references: [id])
+  accountId   Int
+  account     Account  @relation(fields: [accountId], references: [id])
+  description String?
+  quantity    Decimal  @db.Decimal(12, 4)
+  uom         String
+  unitPrice   Decimal  @db.Decimal(14, 4)
+  amount      Decimal  @db.Decimal(14, 2) // enforced = quantity * unitPrice
+
+  @@map("invoice_lines")
+}
+
+// Employee-submitted expense — same posting semantics as an invoice line, with
+// a manager approval step in front. `employeeId` is a loose FK to Phase 0.
+model ExpenseRecord {
+  id          Int       @id @default(autoincrement())
+  employeeId  Int // loose FK -> Employee (Phase 0)
+  date        DateTime
+  accountId   Int?
+  account     Account?  @relation(fields: [accountId], references: [id])
+  productId   Int?
+  product     Product?  @relation(fields: [productId], references: [id])
+  description String?
+  quantity    Decimal?  @db.Decimal(12, 4)
+  uom         String?
+  amount      Decimal   @db.Decimal(14, 2)
+  // draft | submitted | approved | rejected | posted
+  status      String    @default("draft")
+  postedAt    DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("expense_records")
+}
+
+// Fleet ‣ Configuration ‣ Models — CO2 emissions per vehicle model (kgCO2e/km).
+model FleetVehicleModel {
+  id           Int      @id @default(autoincrement())
+  name         String
+  co2Emissions Decimal  @db.Decimal(10, 4) // kgCO2e per km
+  status       String   @default("active")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  vehicles FleetVehicle[]
+
+  @@map("fleet_vehicle_models")
+}
+
+// An employee's assigned vehicle. Only one may be active (endDate null) per
+// employee at a time — enforced in the service layer. `employeeId` loose FK.
+model FleetVehicle {
+  id         Int               @id @default(autoincrement())
+  employeeId Int // loose FK -> Employee (Phase 0)
+  modelId    Int
+  model      FleetVehicleModel @relation(fields: [modelId], references: [id])
+  startDate  DateTime
+  endDate    DateTime?
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  @@map("fleet_vehicles")
+}
+
+// One-off employee travel — feeds Scope 3 Cat 6 via a factor pick in Phase 2.
+model BusinessTravel {
+  id          Int      @id @default(autoincrement())
+  employeeId  Int // loose FK -> Employee (Phase 0)
+  mode        String // flight | train | car | bus
+  origin      String?
+  destination String?
+  distanceKm  Decimal? @db.Decimal(10, 2)
+  date        DateTime
+  purpose     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("business_travels")
+}
+
+// Payroll contract data needed for the pay-gap formula (same job, by gender).
+// `employeeId` loose FK to Phase 0.
+model PayrollContract {
+  id              Int       @id @default(autoincrement())
+  employeeId      Int // loose FK -> Employee (Phase 0)
+  jobPosition     String
+  contractType    String // permanent | temporary
+  leadershipLevel String? // management | non_management
+  country         String?
+  wage            Decimal   @db.Decimal(12, 2)
+  startDate       DateTime
+  endDate         DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("payroll_contracts")
+}
