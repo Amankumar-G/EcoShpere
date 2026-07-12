@@ -25,6 +25,7 @@ model Employee {
   passwordHash     String
   role             Role      @default(employee)
   gender           String?
+  dob              DateTime?
   homeWorkDistance Decimal?  @db.Decimal(8, 2)
   xp               Int       @default(0)
   points           Int       @default(0)
@@ -151,7 +152,7 @@ model Invoice {
   partnerId   Int
   partner     Partner   @relation(fields: [partnerId], references: [id])
   date        DateTime
-  currency    String    @default("EUR")
+  currency    String    @default("INR")
   status      String    @default("draft") // draft | posted
   totalAmount Decimal   @default(0) @db.Decimal(14, 2)
   postedAt    DateTime?
@@ -257,8 +258,8 @@ model PayrollContract {
   employeeId      Int
   employee        Employee  @relation(fields: [employeeId], references: [id])
   jobPosition     String
-  contractType    String // permanent | temporary
-  leadershipLevel String? // management | non_management
+  contractType    String // permanent | temporary | intern | contract
+  leadershipLevel String? // management | non_management | administrative
   country         String?
   wage            Decimal   @db.Decimal(12, 2)
   startDate       DateTime
