@@ -10,7 +10,14 @@ describe('EsgConfigService', () => {
     esgConfig: {
       findUnique: ReturnType<typeof vi.fn>;
       upsert: ReturnType<typeof vi.fn>;
-      createMany: ReturnType<typeof vi.fn>;
+      createMany: ReturnType<
+        typeof vi.fn<
+          (args: {
+            data: { key: string; value: unknown }[];
+            skipDuplicates: boolean;
+          }) => Promise<{ count: number }>
+        >
+      >;
     };
   };
 

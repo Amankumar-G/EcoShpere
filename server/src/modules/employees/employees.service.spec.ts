@@ -139,7 +139,7 @@ describe('EmployeesService', () => {
           name: 'X',
           email: 'x@example.com',
           password: 'password123',
-          role: 'admin' as never,
+          role: 'admin',
         }),
       ).rejects.toBeInstanceOf(ForbiddenException);
       expect(prisma.employee.create).not.toHaveBeenCalled();
@@ -150,7 +150,7 @@ describe('EmployeesService', () => {
       scope.resolveSubtreeIds.mockResolvedValue([10, 11]);
 
       await expect(
-        service.update(manager, 5, { role: 'admin' as never }),
+        service.update(manager, 5, { role: 'admin' }),
       ).rejects.toBeInstanceOf(ForbiddenException);
       expect(prisma.employee.update).not.toHaveBeenCalled();
     });
@@ -162,7 +162,7 @@ describe('EmployeesService', () => {
         name: 'X',
         email: 'x@example.com',
         password: 'password123',
-        role: 'admin' as never,
+        role: 'admin',
       });
 
       expect(result.role).toBe('admin');

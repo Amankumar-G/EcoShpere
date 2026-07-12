@@ -21,7 +21,7 @@ describe('NotificationsService', () => {
     id: 1,
     email: 'actor@example.com',
     name: 'Actor',
-    role: 'employee' as AuthUser['role'],
+    role: 'employee',
     departmentId: null,
   };
 
