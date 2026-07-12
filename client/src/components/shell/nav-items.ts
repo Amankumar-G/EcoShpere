@@ -1,13 +1,22 @@
 import {
+  Banknote,
+  BookOpen,
   Building2,
+  Car,
+  ClipboardList,
+  Contact,
   Gauge,
   Leaf,
   ListTree,
+  Package,
+  Plane,
+  ReceiptText,
   Settings,
   Shield,
   SlidersHorizontal,
   Trophy,
   Users2,
+  Wallet,
   FileBarChart,
   type LucideIcon,
 } from 'lucide-react';
@@ -26,6 +35,7 @@ export const primaryNavItems: NavItem[] = [
   { label: 'Social', href: '/social', icon: Users2 },
   { label: 'Governance', href: '/governance', icon: Shield },
   { label: 'Gamification', href: '/gamification', icon: Trophy },
+  { label: 'Records', href: '/records', icon: ClipboardList },
   { label: 'Reports', href: '/reports', icon: FileBarChart },
   {
     label: 'Settings',
@@ -35,13 +45,14 @@ export const primaryNavItems: NavItem[] = [
   },
 ];
 
-export interface SettingsSubNavItem {
+export interface SubNavItem {
   label: string;
   href: string;
   icon: LucideIcon;
+  roles?: Role[];
 }
 
-export const settingsSubNavItems: SettingsSubNavItem[] = [
+export const settingsSubNavItems: SubNavItem[] = [
   { label: 'Departments', href: '/settings/departments', icon: Building2 },
   { label: 'Employees', href: '/settings/employees', icon: Users2 },
   { label: 'Categories', href: '/settings/categories', icon: ListTree },
@@ -52,5 +63,29 @@ export const settingsSubNavItems: SettingsSubNavItem[] = [
   },
 ];
 
-export const canAccessNavItem = (item: NavItem, role: Role): boolean =>
-  !item.roles || item.roles.includes(role);
+// Records — the Phase 1 operational-records data-entry layer. Payroll is
+// admin-only (feeds the pay-gap scoring formula).
+export const recordsSubNavItems: SubNavItem[] = [
+  { label: 'Invoices', href: '/records/invoices', icon: ReceiptText },
+  { label: 'Expenses', href: '/records/expenses', icon: Wallet },
+  { label: 'Products', href: '/records/products', icon: Package },
+  { label: 'Partners', href: '/records/partners', icon: Contact },
+  { label: 'Accounts', href: '/records/accounts', icon: BookOpen },
+  { label: 'Fleet', href: '/records/fleet', icon: Car },
+  {
+    label: 'Business Travel',
+    href: '/records/business-travel',
+    icon: Plane,
+  },
+  {
+    label: 'Payroll',
+    href: '/records/payroll',
+    icon: Banknote,
+    roles: ['admin'],
+  },
+];
+
+export const canAccessNavItem = (
+  item: { roles?: Role[] },
+  role: Role,
+): boolean => !item.roles || item.roles.includes(role);
