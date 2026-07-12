@@ -27,6 +27,7 @@ import { useEmissionScopeTree } from '@/data/emission-scopes/emission-scopes.hoo
 import { useSourceDatabases } from '@/data/source-databases/source-databases.hooks';
 import { EmissionFactor } from '@/types/emission-factor.interface';
 import { EmissionScope } from '@/types/emission-scope.interface';
+import { UNITS_OF_MEASURE, RECORD_STATUSES } from '@/types/records.interface';
 import {
   EmissionFactorSchema,
   emissionFactorSchema,
@@ -103,7 +104,14 @@ function EmissionFactorFormFields({
       </Field>
       <Field>
         <FieldLabel htmlFor="factor-unit">Unit of measure</FieldLabel>
-        <Input id="factor-unit" {...register('unitOfMeasure')} />
+        <NativeSelect id="factor-unit" {...register('unitOfMeasure')}>
+          <NativeSelectOption value="">Select a unit</NativeSelectOption>
+          {UNITS_OF_MEASURE.map((uom) => (
+            <NativeSelectOption key={uom} value={uom}>
+              {uom}
+            </NativeSelectOption>
+          ))}
+        </NativeSelect>
         <FieldError errors={[errors.unitOfMeasure]} />
       </Field>
       <Field>
@@ -119,7 +127,13 @@ function EmissionFactorFormFields({
       </Field>
       <Field>
         <FieldLabel htmlFor="factor-status">Status</FieldLabel>
-        <Input id="factor-status" {...register('status')} />
+        <NativeSelect id="factor-status" {...register('status')}>
+          {RECORD_STATUSES.map((status) => (
+            <NativeSelectOption key={status} value={status}>
+              {status}
+            </NativeSelectOption>
+          ))}
+        </NativeSelect>
         <FieldError errors={[errors.status]} />
       </Field>
     </>
@@ -136,7 +150,8 @@ function useEmissionFactorFormDialog(onClose: () => void) {
       scopeId: '',
       sourceDatabaseId: '',
       computeMethod: 'physical',
-      unitOfMeasure: '',
+      // Empty placeholder; zod requires a real unit before submit.
+      unitOfMeasure: '' as EmissionFactorSchema['unitOfMeasure'],
       uncertainty: '',
       status: 'active',
     },

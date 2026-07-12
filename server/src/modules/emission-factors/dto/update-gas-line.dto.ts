@@ -1,10 +1,8 @@
+import { IsIn, IsInt, IsOptional, IsPositive } from 'class-validator';
 import {
-  IsInt,
-  IsOptional,
-  IsPositive,
-  IsString,
-  MinLength,
-} from 'class-validator';
+  ACTIVITY_TYPES,
+  GAS_QUANTITY_UNITS,
+} from '../../../common/constants/activity-type.constant';
 
 export class UpdateGasLineDto {
   @IsOptional()
@@ -12,8 +10,7 @@ export class UpdateGasLineDto {
   gasId?: number;
 
   @IsOptional()
-  @IsString()
-  @MinLength(1)
+  @IsIn(ACTIVITY_TYPES)
   activityType?: string;
 
   @IsOptional()
@@ -21,7 +18,6 @@ export class UpdateGasLineDto {
   value?: number;
 
   @IsOptional()
-  @IsString()
-  @MinLength(1)
+  @IsIn(GAS_QUANTITY_UNITS)
   unit?: string;
 }

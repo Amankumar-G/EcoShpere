@@ -1,24 +1,20 @@
+import { IsIn, IsInt, IsOptional, IsPositive } from 'class-validator';
 import {
-  IsInt,
-  IsOptional,
-  IsPositive,
-  IsString,
-  MinLength,
-} from 'class-validator';
+  ACTIVITY_TYPES,
+  GAS_QUANTITY_UNITS,
+} from '../../../common/constants/activity-type.constant';
 
 export class CreateGasLineDto {
   @IsInt()
   gasId: number;
 
   @IsOptional()
-  @IsString()
-  @MinLength(1)
+  @IsIn(ACTIVITY_TYPES)
   activityType?: string;
 
   @IsPositive()
   value: number;
 
-  @IsString()
-  @MinLength(1)
+  @IsIn(GAS_QUANTITY_UNITS)
   unit: string;
 }

@@ -1,14 +1,17 @@
 import { ComputeMethod } from '@prisma/client';
 import {
   IsEnum,
+  IsIn,
   IsInt,
   IsNumber,
   IsOptional,
-  IsString,
   Max,
   Min,
+  IsString,
   MinLength,
 } from 'class-validator';
+import { UNITS_OF_MEASURE } from '../../../common/constants/uom.constant';
+import { RECORD_STATUSES } from '../../../common/constants/record-status.constant';
 
 export class UpdateEmissionFactorDto {
   @IsOptional()
@@ -29,8 +32,7 @@ export class UpdateEmissionFactorDto {
   computeMethod?: ComputeMethod;
 
   @IsOptional()
-  @IsString()
-  @MinLength(1)
+  @IsIn(UNITS_OF_MEASURE)
   unitOfMeasure?: string;
 
   @IsOptional()
@@ -40,7 +42,6 @@ export class UpdateEmissionFactorDto {
   uncertainty?: number;
 
   @IsOptional()
-  @IsString()
-  @MinLength(1)
+  @IsIn(RECORD_STATUSES)
   status?: string;
 }

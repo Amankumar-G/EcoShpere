@@ -25,6 +25,7 @@ import { useSourceDatabases } from '@/data/source-databases/source-databases.hoo
 import { useGases } from '@/data/gases/gases.hooks';
 import { EmissionFactor } from '@/types/emission-factor.interface';
 import { EmissionScope } from '@/types/emission-scope.interface';
+import { UNITS_OF_MEASURE, RECORD_STATUSES } from '@/types/records.interface';
 import {
   EmissionFactorSchema,
   emissionFactorSchema,
@@ -45,9 +46,10 @@ function toFormValues(factor: EmissionFactor): EmissionFactorSchema {
     scopeId: String(factor.scopeId),
     sourceDatabaseId: String(factor.sourceDatabaseId),
     computeMethod: factor.computeMethod,
-    unitOfMeasure: factor.unitOfMeasure,
+    unitOfMeasure:
+      factor.unitOfMeasure as EmissionFactorSchema['unitOfMeasure'],
     uncertainty: factor.uncertainty !== null ? String(factor.uncertainty) : '',
-    status: factor.status,
+    status: factor.status as EmissionFactorSchema['status'],
   };
 }
 
@@ -145,7 +147,14 @@ function EmissionFactorMetadataForm({
         </Field>
         <Field>
           <FieldLabel htmlFor="factor-unit">Unit of measure</FieldLabel>
-          <Input id="factor-unit" {...register('unitOfMeasure')} />
+          <NativeSelect id="factor-unit" {...register('unitOfMeasure')}>
+            <NativeSelectOption value="">Select a unit</NativeSelectOption>
+            {UNITS_OF_MEASURE.map((uom) => (
+              <NativeSelectOption key={uom} value={uom}>
+                {uom}
+              </NativeSelectOption>
+            ))}
+          </NativeSelect>
           <FieldError errors={[errors.unitOfMeasure]} />
         </Field>
         <Field>
@@ -161,7 +170,13 @@ function EmissionFactorMetadataForm({
         </Field>
         <Field>
           <FieldLabel htmlFor="factor-status">Status</FieldLabel>
-          <Input id="factor-status" {...register('status')} />
+          <NativeSelect id="factor-status" {...register('status')}>
+            {RECORD_STATUSES.map((status) => (
+              <NativeSelectOption key={status} value={status}>
+                {status}
+              </NativeSelectOption>
+            ))}
+          </NativeSelect>
           <FieldError errors={[errors.status]} />
         </Field>
         <Field>

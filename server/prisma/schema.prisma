@@ -42,14 +42,23 @@ model Employee {
   fleetVehicles    FleetVehicle[]
   businessTravels  BusinessTravel[]
   payrollContracts PayrollContract[]
+
+  // Phase 3 — Environmental pillar
+  assignedInitiatives Initiative[] @relation("InitiativeAssignee")
+
+  // Phase 3 — Social + Gamification
+  participations          EmployeeParticipation[]
+  challengeParticipations ChallengeParticipation[]
+  employeeBadges          EmployeeBadge[]
+  rewardRedemptions       RewardRedemption[]
 }
 
 model Department {
-  id             Int      @id @default(autoincrement())
-  name           String
-  code           String   @unique
-  status         String   @default("active")
-  employeeCount  Int      @default(0)
+  id            Int    @id @default(autoincrement())
+  name          String
+  code          String @unique
+  status        String @default("active")
+  employeeCount Int    @default(0)
 
   parentId Int?
   parent   Department?  @relation("DeptHierarchy", fields: [parentId], references: [id])
@@ -58,8 +67,13 @@ model Department {
   headEmployeeId Int?
   headEmployee   Employee? @relation("DepartmentHead", fields: [headEmployeeId], references: [id])
 
-  employees Employee[] @relation("DeptEmployees")
+  employees        Employee[]        @relation("DeptEmployees")
   emittedEmissions EmittedEmission[]
+
+  // Phase 3 — Environmental pillar
+  environmentalGoals EnvironmentalGoal[]
+  initiatives        Initiative[]
+  csrActivities      CsrActivity[]
 }
 
 model Category {
@@ -67,6 +81,10 @@ model Category {
   name   String
   type   String
   status String @default("active")
+
+  // Phase 3 — Social + Gamification
+  csrActivities CsrActivity[]
+  challenges    Challenge[]
 }
 
 model EsgConfig {
@@ -75,30 +93,30 @@ model EsgConfig {
 }
 
 model Notification {
-  id        Int      @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   employeeId Int?
-  employee  Employee? @relation(fields: [employeeId], references: [id])
-  type      String
-  channel   String   @default("in_app")
-  payload   Json?
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
+  employee   Employee? @relation(fields: [employeeId], references: [id])
+  type       String
+  channel    String    @default("in_app")
+  payload    Json?
+  isRead     Boolean   @default(false)
+  createdAt  DateTime  @default(now())
 }
 
 model Gas {
-  id       Int     @id @default(autoincrement())
-  name     String
-  symbol   String  @unique
-  gwp      Decimal @db.Decimal(10, 2)
-  gwpMetric String @default("AR5")
+  id        Int     @id @default(autoincrement())
+  name      String
+  symbol    String  @unique
+  gwp       Decimal @db.Decimal(10, 2)
+  gwpMetric String  @default("AR5")
 
   gasLines EmissionFactorGasLine[]
 }
 
 model EmissionScope {
-  id     Int    @id @default(autoincrement())
-  name   String
-  code   String @unique
+  id   Int    @id @default(autoincrement())
+  name String
+  code String @unique
 
   parentId Int?
   parent   EmissionScope?  @relation("ScopeHierarchy", fields: [parentId], references: [id])
@@ -123,13 +141,13 @@ enum ComputeMethod {
 }
 
 model EmissionFactor {
-  id             Int           @id @default(autoincrement())
-  name           String
-  uncertainty    Decimal?      @db.Decimal(5, 2)
-  computeMethod  ComputeMethod
-  unitOfMeasure  String
-  status         String        @default("active")
-  value          Decimal       @default(0) @db.Decimal(18, 4)
+  id            Int           @id @default(autoincrement())
+  name          String
+  uncertainty   Decimal?      @db.Decimal(5, 2)
+  computeMethod ComputeMethod
+  unitOfMeasure String
+  status        String        @default("active")
+  value         Decimal       @default(0) @db.Decimal(18, 4)
 
   scopeId Int
   scope   EmissionScope @relation(fields: [scopeId], references: [id])
@@ -137,7 +155,7 @@ model EmissionFactor {
   sourceDatabaseId Int
   sourceDatabase   SourceDatabase @relation(fields: [sourceDatabaseId], references: [id])
 
-  gasLines EmissionFactorGasLine[]
+  gasLines         EmissionFactorGasLine[]
   emittedEmissions EmittedEmission[]
   assignationRules AssignationRule[]
 }
@@ -394,4 +412,181 @@ model PayrollContract {
   updatedAt       DateTime  @updatedAt
 
   @@map("payroll_contracts")
+}
+
+/// ==============================
+/// PHASE 3 — ENVIRONMENTAL PILLAR
+/// ==============================
+
+// A target metric value with a deadline (e.g. "reduce Scope 2 by 10%").
+model EnvironmentalGoal {
+  id           Int         @id @default(autoincrement())
+  departmentId Int?
+  department   Department? @relation(fields: [departmentId], references: [id])
+  metric       String
+  targetValue  Decimal     @db.Decimal(12, 2)
+  unit         String
+  startDate    DateTime
+  endDate      DateTime
+  status       String      @default("active") // active | achieved | missed | archived
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@map("environmental_goals")
+}
+
+// A concrete reduction action with estimated vs actual CO2 saved. Does not
+// affect the emission footprint until realized.
+model Initiative {
+  id                    Int         @id @default(autoincrement())
+  title                 String
+  description           String?
+  departmentId          Int?
+  department            Department? @relation(fields: [departmentId], references: [id])
+  assigneeEmployeeId    Int?
+  assigneeEmployee      Employee?   @relation("InitiativeAssignee", fields: [assigneeEmployeeId], references: [id])
+  estimatedCo2Reduction Decimal?    @db.Decimal(12, 2)
+  actualCo2Reduction    Decimal?    @db.Decimal(12, 2)
+  progress              Decimal     @default(0) @db.Decimal(5, 2)
+  deadline              DateTime?
+  status                String      @default("open") // open | in_progress | completed | cancelled
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+
+  @@map("initiatives")
+}
+
+/// ==============================
+/// PHASE 3 — SOCIAL + GAMIFICATION
+/// ==============================
+
+// A company-organized social initiative employees participate in.
+model CsrActivity {
+  id           Int         @id @default(autoincrement())
+  title        String
+  description  String?
+  categoryId   Int?
+  category     Category?   @relation(fields: [categoryId], references: [id])
+  departmentId Int?
+  department   Department? @relation(fields: [departmentId], references: [id])
+  points       Int         @default(0) // points awarded on approved participation
+  startDate    DateTime?
+  endDate      DateTime?
+  status       String      @default("draft") // draft | active | completed | archived
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  participations EmployeeParticipation[]
+
+  @@map("csr_activities")
+}
+
+model EmployeeParticipation {
+  id             Int         @id @default(autoincrement())
+  employeeId     Int
+  employee       Employee    @relation(fields: [employeeId], references: [id])
+  csrActivityId  Int
+  csrActivity    CsrActivity @relation(fields: [csrActivityId], references: [id], onDelete: Cascade)
+  proofUrl       String?
+  approvalStatus String      @default("pending") // pending | approved | rejected
+  pointsEarned   Int         @default(0)
+  completionDate DateTime?
+  createdAt      DateTime    @default(now())
+
+  @@unique([employeeId, csrActivityId])
+  @@map("employee_participations")
+}
+
+// A gamified sustainability task that awards XP through a review lifecycle.
+model Challenge {
+  id               Int       @id @default(autoincrement())
+  title            String
+  description      String?
+  categoryId       Int?
+  category         Category? @relation(fields: [categoryId], references: [id])
+  xp               Int       @default(0)
+  difficulty       String? // easy | medium | hard
+  evidenceRequired Boolean   @default(false)
+  deadline         DateTime?
+  status           String    @default("draft") // draft | active | under_review | completed | archived
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  participations ChallengeParticipation[]
+
+  @@map("challenges")
+}
+
+model ChallengeParticipation {
+  id             Int       @id @default(autoincrement())
+  challengeId    Int
+  challenge      Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  employeeId     Int
+  employee       Employee  @relation(fields: [employeeId], references: [id])
+  progress       Decimal   @default(0) @db.Decimal(5, 2)
+  proofUrl       String?
+  approvalStatus String    @default("pending") // pending | approved | rejected
+  xpAwarded      Int       @default(0)
+  createdAt      DateTime  @default(now())
+
+  @@unique([challengeId, employeeId])
+  @@map("challenge_participations")
+}
+
+// An achievement auto-awarded when its unlockRule predicate is satisfied.
+model Badge {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  unlockRule  Json // e.g. { "type": "xp", "threshold": 100 }
+  icon        String?
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  employeeBadges EmployeeBadge[]
+
+  @@map("badges")
+}
+
+model EmployeeBadge {
+  id         Int      @id @default(autoincrement())
+  employeeId Int
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  badgeId    Int
+  badge      Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  status     String   @default("awarded") // awarded | pending (manual award queue)
+  awardedAt  DateTime @default(now())
+
+  @@unique([employeeId, badgeId])
+  @@map("employee_badges")
+}
+
+// A catalog item redeemable with an employee's spendable points.
+model Reward {
+  id             Int      @id @default(autoincrement())
+  name           String
+  description    String?
+  pointsRequired Int
+  stock          Int      @default(0)
+  status         String   @default("active")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  redemptions RewardRedemption[]
+
+  @@map("rewards")
+}
+
+model RewardRedemption {
+  id             Int      @id @default(autoincrement())
+  employeeId     Int
+  employee       Employee @relation(fields: [employeeId], references: [id])
+  rewardId       Int
+  reward         Reward   @relation(fields: [rewardId], references: [id])
+  pointsDeducted Int
+  status         String   @default("confirmed")
+  redeemedAt     DateTime @default(now())
+
+  @@map("reward_redemptions")
 }

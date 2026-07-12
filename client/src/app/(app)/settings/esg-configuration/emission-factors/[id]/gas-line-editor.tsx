@@ -16,7 +16,11 @@ import {
   useRemoveGasLine,
   useUpdateGasLine,
 } from '@/data/emission-factors/emission-factors.hooks';
-import { EmissionFactorGasLine } from '@/types/emission-factor.interface';
+import {
+  ACTIVITY_TYPES,
+  EmissionFactorGasLine,
+  GAS_QUANTITY_UNITS,
+} from '@/types/emission-factor.interface';
 import { Gas } from '@/types/gas.interface';
 import { gasLineSchema } from '@/lib/zod-schemas/emission-factor.schema';
 import { getErrorMessage } from '@/lib/axios/get-error-message';
@@ -130,19 +134,32 @@ function GasLineRow({
           value={draft.value}
           onChange={(event) => update({ value: event.target.value })}
         />
-        <Input
+        <NativeSelect
           aria-label="Unit"
           className="w-24"
           value={draft.unit}
           onChange={(event) => update({ unit: event.target.value })}
-        />
-        <Input
+        >
+          <NativeSelectOption value="">Unit</NativeSelectOption>
+          {GAS_QUANTITY_UNITS.map((unit) => (
+            <NativeSelectOption key={unit} value={unit}>
+              {unit}
+            </NativeSelectOption>
+          ))}
+        </NativeSelect>
+        <NativeSelect
           aria-label="Activity type (optional)"
-          placeholder="Activity type"
           className="w-40"
           value={draft.activityType}
           onChange={(event) => update({ activityType: event.target.value })}
-        />
+        >
+          <NativeSelectOption value="">Activity type</NativeSelectOption>
+          {ACTIVITY_TYPES.map((activityType) => (
+            <NativeSelectOption key={activityType} value={activityType}>
+              {activityType}
+            </NativeSelectOption>
+          ))}
+        </NativeSelect>
         <span className="ml-auto min-w-24 text-right tabular-nums text-muted-foreground">
           {formatCo2e(computeContribution(draft, gases))} kgCO2e
         </span>
@@ -238,19 +255,32 @@ function NewGasLineRow({
           value={draft.value}
           onChange={(event) => update({ value: event.target.value })}
         />
-        <Input
+        <NativeSelect
           aria-label="Unit"
           className="w-24"
           value={draft.unit}
           onChange={(event) => update({ unit: event.target.value })}
-        />
-        <Input
+        >
+          <NativeSelectOption value="">Unit</NativeSelectOption>
+          {GAS_QUANTITY_UNITS.map((unit) => (
+            <NativeSelectOption key={unit} value={unit}>
+              {unit}
+            </NativeSelectOption>
+          ))}
+        </NativeSelect>
+        <NativeSelect
           aria-label="Activity type (optional)"
-          placeholder="Activity type"
           className="w-40"
           value={draft.activityType}
           onChange={(event) => update({ activityType: event.target.value })}
-        />
+        >
+          <NativeSelectOption value="">Activity type</NativeSelectOption>
+          {ACTIVITY_TYPES.map((activityType) => (
+            <NativeSelectOption key={activityType} value={activityType}>
+              {activityType}
+            </NativeSelectOption>
+          ))}
+        </NativeSelect>
         <span className="ml-auto min-w-24 text-right tabular-nums text-muted-foreground">
           {formatCo2e(computeContribution(draft, gases))} kgCO2e
         </span>
