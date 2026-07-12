@@ -71,6 +71,7 @@ export class EmployeesService {
           role: dto.role ?? Role.employee,
           departmentId: dto.departmentId ?? null,
           gender: dto.gender,
+          dob: dto.dob ? new Date(dto.dob) : undefined,
           homeWorkDistance: dto.homeWorkDistance,
         },
       });
@@ -97,6 +98,7 @@ export class EmployeesService {
           role: dto.role,
           departmentId: dto.departmentId,
           gender: dto.gender,
+          dob: dto.dob ? new Date(dto.dob) : undefined,
           homeWorkDistance: dto.homeWorkDistance,
           status: dto.status,
         },
@@ -200,6 +202,7 @@ function toEmployeeResponse(employee: EmployeeRecord): EmployeeResponseDto {
     email: employee.email,
     role: employee.role,
     gender: employee.gender,
+    dob: employee.dob,
     homeWorkDistance: employee.homeWorkDistance
       ? Number(employee.homeWorkDistance)
       : null,

@@ -1,13 +1,17 @@
 import { Role } from '@prisma/client';
 import {
+  IsDateString,
   IsEmail,
   IsEnum,
+  IsIn,
   IsInt,
   IsNumber,
   IsOptional,
   IsString,
   MinLength,
 } from 'class-validator';
+
+export const GENDERS = ['male', 'female', 'other'] as const;
 
 export class CreateEmployeeDto {
   @IsString()
@@ -30,8 +34,12 @@ export class CreateEmployeeDto {
   departmentId?: number;
 
   @IsOptional()
-  @IsString()
+  @IsIn(GENDERS)
   gender?: string;
+
+  @IsOptional()
+  @IsDateString()
+  dob?: string;
 
   @IsOptional()
   @IsNumber()
