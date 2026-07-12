@@ -1,8 +1,6 @@
 import Link from 'next/link';
 import { ArrowLeft, Leaf } from 'lucide-react';
 import { LoginForm } from '@/components/auth/LoginForm';
-import { SignupForm } from '@/components/auth/SignupForm';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function LoginPage() {
   return (
@@ -47,33 +45,12 @@ export default function LoginPage() {
               Sign in to EcoSphere
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Sign in to your account or create a new one to get started.
+              Sign in with the account your administrator created for you.
             </p>
           </div>
 
           <div className="rounded-3xl border border-border bg-card p-6 shadow-xl shadow-black/5 sm:p-8">
-            <Tabs defaultValue="login">
-              <TabsList className="w-full rounded-full bg-muted p-1">
-                <TabsTrigger
-                  value="login"
-                  className="rounded-full data-active:bg-primary data-active:text-primary-foreground"
-                >
-                  Log in
-                </TabsTrigger>
-                <TabsTrigger
-                  value="signup"
-                  className="rounded-full data-active:bg-primary data-active:text-primary-foreground"
-                >
-                  Sign up
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="login" className="pt-6">
-                <LoginForm />
-              </TabsContent>
-              <TabsContent value="signup" className="pt-6">
-                <SignupForm />
-              </TabsContent>
-            </Tabs>
+            <LoginForm />
           </div>
         </div>
       </section>
